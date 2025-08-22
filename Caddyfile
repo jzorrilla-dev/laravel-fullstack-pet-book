@@ -1,8 +1,0 @@
-*.up.railway.app {
-    # The header directive must be inside a server block
-    header Access-Control-Allow-Origin "https://pet-book-client-nine.vercel.app"
-
-    root * /app/public
-    php_fastcgi unix//run/php-fpm/php-fpm.sock
-    file_server
-}
