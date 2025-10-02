@@ -7,26 +7,57 @@ use App\Models\Pet;
 use CloudinaryLabs\CloudinaryLaravel\Facades\Cloudinary;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Validation\ValidationException;
+use Exception;
 
 class PetController extends Controller
 {
-    public function __construct()
+    /**
+     * Muestra la página de inicio con una vista previa de mascotas.
+     */
+    public function home()
     {
-        // Esto protegerá todas las rutas de este controlador excepto index y show
-        $this->middleware('auth:sanctum')->except(['index', 'show']);
+        // Se eliminó la llamada a where() ya que este controlador solo maneja mascotas en adopción.
+        $pets = Pet::latest()->take(8)->get();
+        return view('home', compact('pets'));
     }
 
+    /**
+     * Muestra una lista de todas las mascotas disponibles para adopción.
+     */
+    public function index()
+    {
+        // Se eliminó la llamada a where() ya que este controlador solo maneja mascotas en adopción.
+        $pets = Pet::latest()->get();
+        return view('pets.index', compact('pets'));
+    }
+
+    /**
+     * Muestra los detalles de una mascota específica.
+     */
+    public function show($pet_id)
+    {
+        // Busca la mascota por ID, fallando si no la encuentra
+        $pet = Pet::with('user')->findOrFail($pet_id);
+
+        // Devuelve la vista 'pets.show' y le pasa la mascota
+        return view('pets.show', compact('pet'));
+    }
+
+    /**
+     * Muestra el formulario para crear una nueva mascota.
+     */
+    public function create()
+    {
+        return view('pets.create');
+    }
+
+    /**
+     * Almacena una nueva mascota en la base de datos.
+     */
     public function store(Request $request)
     {
-        Log::info('CLOUDINARY_URL: ' . env('CLOUDINARY_URL'));
-        Log::info('Request data:', $request->all());
-        Log::info('Archivo recibido: ' . ($request->hasFile('pet_photo') ? 'Sí' : 'No'));
-
-        if ($request->has('castrated')) {
-            Log::info('Castrated value:', [$request->castrated, gettype($request->castrated)]);
-        }
-
-        $validated = $request->validate([
+        $request->validate([
             'pet_name' => 'required|string|max:255',
             'location' => 'required|string|max:255',
             'pet_species' => 'required|string|max:255',
@@ -46,63 +77,61 @@ class PetController extends Controller
             $pet->castrated = filter_var($request->castrated, FILTER_VALIDATE_BOOLEAN);
             $pet->pet_status = 'available';
 
-            $pet->user_id = Auth::id(); // ¡Esto es correcto!
-            Log::info('User ID autenticado para la mascota:', ['user_id' => $pet->user_id]);
-
+            // Aseguramos que el user_id se asigne solo si hay un usuario autenticado
+            if (Auth::check()) {
+                $pet->user_id = Auth::id();
+            } else {
+                // Manejar el caso donde no hay un usuario autenticado
+                throw new Exception('Usuario no autenticado para crear una mascota.');
+            }
 
             if ($request->hasFile('pet_photo') && $request->file('pet_photo')->isValid()) {
-                Log::info('Subiendo archivo a Cloudinary...');
                 $uploadedFile = $request->file('pet_photo');
                 $result = Cloudinary::upload($uploadedFile->getRealPath(), [
                     'folder' => 'pets',
                     'public_id' => 'pet_' . time()
                 ]);
-
                 $pet->pet_photo = $result->getSecurePath();
-                Log::info('Archivo subido a Cloudinary: ' . $pet->pet_photo);
             } else {
                 $pet->pet_photo = null;
             }
 
             $pet->save();
 
-            return response()->json($pet, 201);
-        } catch (\Exception $e) {
+            // Redirige a la página de detalles de la mascota recién creada
+            return redirect()->route('pets.show', ['pet_id' => $pet->pet_id])
+                ->with('status', '¡Mascota registrada con éxito!');
+        } catch (Exception $e) {
             Log::error('Error al crear mascota: ' . $e->getMessage());
-            Log::error('Stack trace: ' . $e->getTraceAsString());
-            return response()->json(['message' => 'Error al crear la mascota: ' . $e->getMessage()], 500);
+            return back()->withInput()->with('error', 'Error al crear la mascota. Inténtalo de nuevo.');
         }
     }
 
-    public function index()
+
+    /**
+     * Muestra el formulario para editar una mascota.
+     */
+    public function edit($pet_id)
     {
-        // Cargar la relación 'user' para incluir los datos del usuario
-        $pets = Pet::where('pet_status', 'available')->with('user')->get();
-        return response()->json($pets);
+        $pet = Pet::findOrFail($pet_id);
+
+        // Verifica que el usuario autenticado sea el dueño de la mascota
+        if ((int) Auth::id() !== (int) $pet->user_id) {
+            abort(403);
+        }
+
+        return view('pets.edit', compact('pet'));
     }
 
-    public function show($pet_id)
-    {
-        // Cargar la relación 'user' para incluir los datos del usuario
-        $pet = Pet::with('user')->findOrFail($pet_id);
-        return response()->json($pet);
-    }
-
+    /**
+     * Actualiza una mascota en la base de datos.
+     */
     public function update(Request $request, $pet_id)
     {
         $pet = Pet::findOrFail($pet_id);
 
-        // --- ¡CORRECCIÓN CLAVE AQUÍ! ---
-        // Casteamos ambos IDs a entero para asegurar la comparación de tipo y valor.
-        // Accedemos al ID del usuario autenticado vía user()->user_id (como en tu modelo User)
-        if ((int) $request->user()->user_id !== (int) $pet->user_id) {
-            Log::warning('403 Forbidden: User ID mismatch for Pet update.', [
-                'authenticated_user_id' => $request->user()->user_id,
-                'authenticated_user_id_type' => gettype($request->user()->user_id),
-                'pet_user_id' => $pet->user_id,
-                'pet_user_id_type' => gettype($pet->user_id),
-            ]);
-            return response()->json(['message' => 'No autorizado para editar esta mascota'], 403);
+        if ((int) Auth::id() !== (int) $pet->user_id) {
+            abort(403);
         }
 
         $validated = $request->validate([
@@ -134,36 +163,32 @@ class PetController extends Controller
 
             $pet->save();
 
-            return response()->json($pet);
+            return redirect()->route('pets.show', ['pet_id' => $pet->id])
+                ->with('status', '¡Mascota actualizada con éxito!');
         } catch (\Exception $e) {
             Log::error('Error al actualizar mascota: ' . $e->getMessage());
-            return response()->json(['message' => 'Error al actualizar la mascota'], 500);
+            return back()->withInput()->with('error', 'Error al actualizar la mascota. Inténtalo de nuevo.');
         }
     }
 
-    public function destroy(Request $request, $pet_id)
+    /**
+     * Elimina una mascota de la base de datos.
+     */
+    public function destroy($pet_id)
     {
         $pet = Pet::findOrFail($pet_id);
 
-        // --- ¡CORRECCIÓN CLAVE AQUÍ! ---
-        // Casteamos ambos IDs a entero para asegurar la comparación de tipo y valor.
-        // Accedemos al ID del usuario autenticado vía user()->user_id (como en tu modelo User)
-        if ((int) $request->user()->user_id !== (int) $pet->user_id) {
-            Log::warning('403 Forbidden: User ID mismatch for Pet delete.', [
-                'authenticated_user_id' => $request->user()->user_id,
-                'authenticated_user_id_type' => gettype($request->user()->user_id),
-                'pet_user_id' => $pet->user_id,
-                'pet_user_id_type' => gettype($pet->user_id),
-            ]);
-            return response()->json(['message' => 'No autorizado para eliminar esta mascota'], 403);
+        if ((int) Auth::id() !== (int) $pet->user_id) {
+            abort(403);
         }
 
         try {
             $pet->delete();
-            return response()->json(['message' => 'Mascota eliminada con éxito']);
+            return redirect()->route('home')
+                ->with('status', '¡Mascota eliminada con éxito!');
         } catch (\Exception $e) {
             Log::error('Error al eliminar mascota: ' . $e->getMessage());
-            return response()->json(['message' => 'Error al eliminar la mascota'], 500);
+            return back()->with('error', 'Error al eliminar la mascota. Inténtalo de nuevo.');
         }
     }
 }

@@ -7,20 +7,47 @@ use App\Models\LostPet;
 use CloudinaryLabs\CloudinaryLaravel\Facades\Cloudinary;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Validation\ValidationException;
 
 class LostPetController extends Controller
 {
-    public function __construct()
+    /**
+     * Muestra una lista de mascotas perdidas.
+     */
+    public function index()
     {
-        // ¡IMPORTANTE! Haz 'index' y 'show' públicos para que las mascotas se vean sin login.
-        $this->middleware('auth:sanctum')->except(['index', 'show']);
+        // Cargar la relación 'user' para incluir los datos del usuario
+        $lostPets = LostPet::with('user')->latest()->get();
+
+        // Devuelve la vista 'lostpets.index' y le pasa la colección de mascotas
+        return view('lostpets.index', compact('lostPets'));
     }
 
+    /**
+     * Muestra los detalles de una mascota perdida específica.
+     */
+    public function show($id)
+    {
+        // Busca la mascota perdida por ID, fallando si no la encuentra
+        $lostPet = LostPet::with('user')->findOrFail($id);
+
+        // Devuelve la vista 'lostpets.show' y le pasa la mascota perdida
+        return view('lostpets.show', compact('lostPet'));
+    }
+
+    /**
+     * Muestra el formulario para crear una nueva publicación de mascota perdida.
+     */
+    public function create()
+    {
+        return view('lostpets.create');
+    }
+
+    /**
+     * Almacena una nueva mascota perdida en la base de datos.
+     */
     public function store(Request $request)
     {
-        Log::info('Request data (LostPet):', $request->all());
-        Log::info('Archivo recibido (LostPet): ' . ($request->hasFile('pet_photo') ? 'Sí' : 'No'));
-
         $validated = $request->validate([
             'pet_name' => 'nullable|string|max:255',
             'last_seen' => 'nullable|string|max:255',
@@ -31,15 +58,8 @@ class LostPetController extends Controller
         ]);
 
         try {
-            $userId = Auth::id();
-
-            if (is_null($userId)) {
-                Log::error('Intento de crear LostPet sin user_id autenticado.');
-                return response()->json(['message' => 'No autorizado. Por favor, inicia sesión.'], 401);
-            }
-
             $lostPet = new LostPet();
-            $lostPet->user_id = $userId;
+            $lostPet->user_id = Auth::id(); // Obtiene el ID del usuario autenticado
             $lostPet->pet_name = $request->pet_name;
             $lostPet->last_seen = $request->last_seen;
             $lostPet->lost_date = $request->lost_date;
@@ -47,58 +67,51 @@ class LostPetController extends Controller
             $lostPet->description = $request->description ?? '';
 
             if ($request->hasFile('pet_photo') && $request->file('pet_photo')->isValid()) {
-                Log::info('Subiendo archivo de mascota perdida a Cloudinary...');
                 $uploadedFile = $request->file('pet_photo');
                 $result = Cloudinary::upload($uploadedFile->getRealPath(), [
                     'folder' => 'lost_pets',
                     'public_id' => 'lost_' . time(),
                 ]);
                 $lostPet->pet_photo = $result->getSecurePath();
-                Log::info('Archivo subido a Cloudinary: ' . $lostPet->pet_photo);
             } else {
                 $lostPet->pet_photo = null;
             }
 
             $lostPet->save();
 
-            Log::info('Mascota perdida creada exitosamente:', $lostPet->toArray());
-            return response()->json($lostPet, 201);
+            // Redirige a la página de detalles de la publicación recién creada
+            return redirect()->route('lostpets.show', ['id' => $lostPet->id])
+                ->with('status', '¡Publicación de mascota perdida registrada con éxito!');
         } catch (\Exception $e) {
             Log::error('Error al registrar mascota perdida: ' . $e->getMessage());
-            Log::error('Stack trace LostPetController: ' . $e->getTraceAsString());
-            return response()->json(['message' => 'Error al registrar la publicación', 'error' => $e->getMessage()], 500);
+            return back()->withInput()->with('error', 'Error al registrar la publicación. Inténtalo de nuevo.');
         }
     }
 
-    public function index()
-    {
-        // Cargar la relación 'user' para incluir los datos del usuario
-        $lostPets = LostPet::with('user')->latest()->get();
-        return response()->json($lostPets);
-    }
-
-    public function show($id)
-    {
-        // Cargar la relación 'user' para incluir los datos del usuario
-        $lostPet = LostPet::with('user')->findOrFail($id);
-        return response()->json($lostPet);
-    }
-
-    public function update(Request $request, $id) // Asumo que también tienes un método update para LostPet
+    /**
+     * Muestra el formulario para editar una publicación de mascota perdida.
+     */
+    public function edit($id)
     {
         $lostPet = LostPet::findOrFail($id);
 
-        // --- ¡CORRECCIÓN CLAVE AQUÍ! ---
-        // Casteamos ambos IDs a entero para asegurar la comparación de tipo y valor.
-        // Accedemos al ID del usuario autenticado vía user()->user_id (como en tu modelo User)
-        if ((int) $request->user()->user_id !== (int) $lostPet->user_id) {
-            Log::warning('403 Forbidden: User ID mismatch for LostPet update.', [
-                'authenticated_user_id' => $request->user()->user_id,
-                'authenticated_user_id_type' => gettype($request->user()->user_id),
-                'lost_pet_user_id' => $lostPet->user_id,
-                'lost_pet_user_id_type' => gettype($lostPet->user_id),
-            ]);
-            return response()->json(['message' => 'No autorizado para editar esta mascota perdida'], 403);
+        // Verifica que el usuario autenticado sea el creador de la publicación
+        if ((int) Auth::id() !== (int) $lostPet->user_id) {
+            abort(403);
+        }
+
+        return view('lostpets.edit', compact('lostPet'));
+    }
+
+    /**
+     * Actualiza una publicación de mascota perdida en la base de datos.
+     */
+    public function update(Request $request, $id)
+    {
+        $lostPet = LostPet::findOrFail($id);
+
+        if ((int) Auth::id() !== (int) $lostPet->user_id) {
+            abort(403);
         }
 
         $validated = $request->validate([
@@ -127,36 +140,33 @@ class LostPetController extends Controller
             }
 
             $lostPet->save();
-            return response()->json($lostPet);
+
+            return redirect()->route('lostpets.show', ['id' => $lostPet->id])
+                ->with('status', '¡Publicación actualizada con éxito!');
         } catch (\Exception $e) {
             Log::error('Error al actualizar mascota perdida: ' . $e->getMessage());
-            return response()->json(['message' => 'Error al actualizar la publicación'], 500);
+            return back()->withInput()->with('error', 'Error al actualizar la publicación. Inténtalo de nuevo.');
         }
     }
 
-    public function destroy($id, Request $request)
+    /**
+     * Elimina una publicación de mascota perdida de la base de datos.
+     */
+    public function destroy($id)
     {
         $lostPet = LostPet::findOrFail($id);
 
-        // --- ¡CORRECCIÓN CLAVE AQUÍ! ---
-        // Casteamos ambos IDs a entero para asegurar la comparación de tipo y valor.
-        // Accedemos al ID del usuario autenticado vía user()->user_id (como en tu modelo User)
-        if ((int) $request->user()->user_id !== (int) $lostPet->user_id) {
-            Log::warning('403 Forbidden: User ID mismatch for LostPet delete.', [
-                'authenticated_user_id' => $request->user()->user_id,
-                'authenticated_user_id_type' => gettype($request->user()->user_id),
-                'lost_pet_user_id' => $lostPet->user_id,
-                'lost_pet_user_id_type' => gettype($lostPet->user_id),
-            ]);
-            return response()->json(['message' => 'No autorizado'], 403);
+        if ((int) Auth::id() !== (int) $lostPet->user_id) {
+            abort(403);
         }
 
         try {
             $lostPet->delete();
-            return response()->json(['message' => 'Publicación eliminada con éxito']);
+            return redirect()->route('lostpets.index')
+                ->with('status', '¡Publicación eliminada con éxito!');
         } catch (\Exception $e) {
-            Log::error('Error al eliminar mascota: ' . $e->getMessage());
-            return response()->json(['message' => 'Error al eliminar la mascota'], 500);
+            Log::error('Error al eliminar mascota perdida: ' . $e->getMessage());
+            return back()->with('error', 'Error al eliminar la publicación. Inténtalo de nuevo.');
         }
     }
 }
