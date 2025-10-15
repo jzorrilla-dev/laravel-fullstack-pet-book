@@ -8,7 +8,6 @@ use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Laravel\Sanctum\HasApiTokens;
 use Illuminate\Auth\Passwords\CanResetPassword;
-use App\Notifications\CustomPasswordResetNotification;
 use App\Notifications\ResetPasswordNotification; // Importa tu notificador
 
 class User extends Authenticatable
@@ -54,6 +53,18 @@ class User extends Authenticatable
         return $this->hasMany(Adoption::class, 'adopter_user_id');
     }
 
+    // Relación con los posts creados por el usuario
+    public function posts()
+    {
+        return $this->hasMany(Post::class, 'user_id', 'user_id');
+    }
+
+    // Relación con los comentarios creados por el usuario
+    public function comments()
+    {
+        return $this->hasMany(Comment::class, 'user_id', 'user_id');
+    }
+
     /**
      * Send the password reset notification.
      *
@@ -64,5 +75,4 @@ class User extends Authenticatable
     {
         $this->notify(new ResetPasswordNotification($token));
     }
-
 }

@@ -4,12 +4,12 @@
 <div class="container mx-auto max-w-4xl px-4 py-8">
     <!-- Header del perfil -->
     <div class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden mb-6">
-        <div class="bg-gradient-to-r from-orange-500 to-orange-600 h-32"></div>
+        <div class="bg-gradient-to-r from-blue-500 to-blue-600 h-32"></div>
         <div class="px-6 pb-6">
             <div class="flex flex-col sm:flex-row items-center sm:items-end -mt-16 sm:-mt-12">
                 <!-- Avatar -->
                 <div class="bg-white rounded-full p-2 shadow-lg mb-4 sm:mb-0">
-                    <div class="w-24 h-24 sm:w-32 sm:h-32 bg-gradient-to-br from-orange-400 to-orange-600 rounded-full flex items-center justify-center text-white text-4xl sm:text-5xl font-bold">
+                    <div class="w-24 h-24 sm:w-32 sm:h-32 bg-gradient-to-br from-blue-400 to-blue-600 rounded-full flex items-center justify-center text-white text-4xl sm:text-5xl font-bold">
                         {{ strtoupper(substr($user->user_name, 0, 1)) }}
                     </div>
                 </div>
@@ -18,16 +18,16 @@
                 <div class="sm:ml-6 text-center sm:text-left flex-1">
                     <h1 class="text-2xl sm:text-3xl font-bold text-gray-900">{{ $user->user_name }}</h1>
                     <p class="text-gray-600 flex items-center justify-center sm:justify-start gap-2 mt-1">
-                        <i class="fa-solid fa-location-dot text-orange-500"></i>
+                        <i class="fa-solid fa-location-dot text-blue-600"></i>
                         {{ $user->city }}
                     </p>
                 </div>
 
-                <!-- Botón editar (para futuro) -->
+                <!-- Botón editar -->
                 <div class="mt-4 sm:mt-0">
-                    <button class="px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-lg transition font-medium text-sm">
+                    <a href="{{ route('profile.edit') }}" class="px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-lg transition font-medium text-sm inline-flex items-center">
                         <i class="fa-solid fa-pen-to-square mr-2"></i>Editar Perfil
-                    </button>
+                    </a>
                 </div>
             </div>
         </div>
@@ -38,13 +38,13 @@
         <!-- Información de contacto -->
         <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
             <h2 class="text-xl font-bold text-gray-900 mb-4 flex items-center gap-2">
-                <i class="fa-solid fa-address-card text-orange-500"></i>
+                <i class="fa-solid fa-address-card text-blue-600"></i>
                 Información de Contacto
             </h2>
             <div class="space-y-4">
                 <div class="flex items-start gap-3">
-                    <div class="w-10 h-10 bg-orange-50 rounded-lg flex items-center justify-center flex-shrink-0">
-                        <i class="fa-solid fa-envelope text-orange-500"></i>
+                    <div class="w-10 h-10 bg-blue-50 rounded-lg flex items-center justify-center flex-shrink-0">
+                        <i class="fa-solid fa-envelope text-blue-600"></i>
                     </div>
                     <div>
                         <p class="text-sm text-gray-500 font-medium">Email</p>
@@ -52,8 +52,8 @@
                     </div>
                 </div>
                 <div class="flex items-start gap-3">
-                    <div class="w-10 h-10 bg-orange-50 rounded-lg flex items-center justify-center flex-shrink-0">
-                        <i class="fa-solid fa-phone text-orange-500"></i>
+                    <div class="w-10 h-10 bg-blue-50 rounded-lg flex items-center justify-center flex-shrink-0">
+                        <i class="fa-solid fa-phone text-blue-600"></i>
                     </div>
                     <div>
                         <p class="text-sm text-gray-500 font-medium">Teléfono</p>
@@ -61,8 +61,8 @@
                     </div>
                 </div>
                 <div class="flex items-start gap-3">
-                    <div class="w-10 h-10 bg-orange-50 rounded-lg flex items-center justify-center flex-shrink-0">
-                        <i class="fa-solid fa-map-marker-alt text-orange-500"></i>
+                    <div class="w-10 h-10 bg-blue-50 rounded-lg flex items-center justify-center flex-shrink-0">
+                        <i class="fa-solid fa-map-marker-alt text-blue-600"></i>
                     </div>
                     <div>
                         <p class="text-sm text-gray-500 font-medium">Ciudad</p>
@@ -75,7 +75,7 @@
         <!-- Estadísticas -->
         <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
             <h2 class="text-xl font-bold text-gray-900 mb-4 flex items-center gap-2">
-                <i class="fa-solid fa-chart-simple text-orange-500"></i>
+                <i class="fa-solid fa-chart-simple text-blue-600"></i>
                 Actividad
             </h2>
             <div class="space-y-4">
@@ -120,9 +120,9 @@
     <div class="mt-6 bg-white rounded-xl shadow-sm border border-gray-200 p-6">
         <h2 class="text-xl font-bold text-gray-900 mb-4">Acciones Rápidas</h2>
         <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-            <a href="{{ route('pets.create') }}" class="flex items-center gap-3 p-4 border-2 border-orange-200 hover:border-orange-400 rounded-lg transition group">
-                <div class="w-12 h-12 bg-orange-100 rounded-lg flex items-center justify-center group-hover:bg-orange-200 transition">
-                    <i class="fa-solid fa-plus text-orange-600 text-xl"></i>
+            <a href="{{ route('pets.create') }}" class="flex items-center gap-3 p-4 border-2 border-blue-200 hover:border-blue-400 rounded-lg transition group">
+                 <div class="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center group-hover:bg-blue-200 transition">
+                     <i class="fa-solid fa-plus text-blue-600 text-xl"></i>
                 </div>
                 <div>
                     <p class="font-semibold text-gray-900">Publicar Mascota</p>

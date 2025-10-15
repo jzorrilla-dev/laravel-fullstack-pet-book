@@ -22,6 +22,22 @@
                         <p class="text-sm font-semibold text-gray-500">Ubicación</p>
                         <p class="mt-1 text-gray-900">{{ $pet->location }}</p>
                     </div>
+                    <div>
+                        <p class="text-sm font-semibold text-gray-500">número de contacto</p>
+                        <p class="mt-1 text-gray-900">{{ $pet->user->user_phone }}</p>
+                    </div>
+                    <div>
+                        <p class="text-sm font-semibold text-gray-500">Publicado por:</p>
+                        <p class="mt-1 text-gray-900">{{ $pet->user->user_name }}</p>
+                    </div>
+                    <div>
+                        <p class="text-sm font-semibold text-gray-500">¿Está castrado?</p>
+                        @if ($pet->castrated === true)
+                        <p class="mt-1 text-gray-900">castrado</p>
+                        @else
+                        <p class="mt-1 text-gray-900">no castrado</p>
+                        @endif
+                    </div>
                 </div>
 
                 <!-- Botones de Acción para el Dueño -->

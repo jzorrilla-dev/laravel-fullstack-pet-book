@@ -162,4 +162,47 @@ class AuthController extends Controller
         $user = Auth::user();
         return view('profile.show', compact('user'));
     }
+
+    /**
+     * Muestra el formulario para editar el perfil del usuario autenticado.
+     */
+    public function editProfile()
+    {
+        $user = Auth::user();
+        return view('profile.edit', compact('user'));
+    }
+
+    /**
+     * Actualiza el perfil del usuario autenticado.
+     */
+    public function updateProfile(Request $request)
+    {
+        $user = Auth::user();
+
+        // Validación. Email único exceptuando el propio usuario. Password opcional.
+        $validated = $request->validate([
+            'user_name' => ['required', 'string', 'max:255'],
+            'user_phone' => ['required', 'string', 'max:20'],
+            'city' => ['required', 'string', 'max:100'],
+            'email' => ['required', 'string', 'email', 'max:255', 'unique:users,email,' . $user->user_id . ',user_id'],
+            'description' => ['nullable', 'string', 'max:1000'],
+            'password' => ['nullable', 'string', 'min:8', 'confirmed'],
+        ]);
+
+        // Actualizar campos básicos
+        $user->user_name = $validated['user_name'];
+        $user->user_phone = $validated['user_phone'];
+        $user->city = $validated['city'];
+        $user->email = $validated['email'];
+        $user->description = $validated['description'] ?? $user->description;
+
+        // Actualizar password si se envió
+        if (!empty($validated['password'])) {
+            $user->password = Hash::make($validated['password']);
+        }
+
+        $user->save();
+
+        return redirect()->route('profile')->with('success', 'Perfil actualizado correctamente.');
+    }
 }
