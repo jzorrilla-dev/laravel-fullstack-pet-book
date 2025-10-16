@@ -41,13 +41,18 @@ Para almacenar archivos subidos por los usuarios (imágenes de mascotas, etc.):
    - Runtime: Docker
    - Branch: `main` (o la rama que uses para producción)
    - Build Command: `chmod +x build.sh && ./build.sh`
-   - Start Command: `php artisan serve --host 0.0.0.0 --port $PORT`
+   - Start Command: Deja este campo vacío, ya que el Dockerfile ahora incluye el comando CMD para iniciar los servicios
    - Plan: Selecciona según tus necesidades
+   - **IMPORTANTE**: En la sección "Advanced" asegúrate de que "Auto-Deploy on Push" esté activado
 
 4. Configura las variables de entorno (en la sección "Environment"):
    - Todas las variables definidas en `.env.example`
    - Asegúrate de incluir las credenciales de PostgreSQL y S3
-   - Añade `PORT=8000`
+   - No es necesario añadir `PORT=8000` ya que ahora usamos el puerto 80 estándar con Nginx
+
+5. Configuración de puertos:
+   - El Dockerfile ya expone el puerto 80, que es el que Render detectará automáticamente
+   - No es necesario configurar ningún puerto adicional
 
 5. Haz clic en "Create Web Service" y espera a que se complete el despliegue.
 

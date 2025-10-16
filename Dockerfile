@@ -15,7 +15,9 @@ RUN apt-get update && apt-get install -y \
     zip \
     unzip \
     nodejs \
-    npm
+    npm \
+    nginx \
+    supervisor
 
 # Limpiar cache
 RUN apt-get clean && rm -rf /var/lib/apt/lists/*
@@ -47,11 +49,17 @@ RUN composer install --optimize-autoloader --no-dev
 # Instalar dependencias de NPM y compilar assets
 RUN npm install && npm run build
 
-# Cambiar al usuario no root
-USER $user
+# Configurar Nginx
+COPY nginx.conf /etc/nginx/sites-available/default
+RUN ln -sf /etc/nginx/sites-available/default /etc/nginx/sites-enabled/
 
-# Exponer puerto 9000 para PHP-FPM
+# Configurar Supervisor para ejecutar PHP-FPM y Nginx
+RUN mkdir -p /etc/supervisor/conf.d/
+COPY supervisord.conf /etc/supervisor/conf.d/supervisord.conf
+
+# Exponer puertos
+EXPOSE 80
 EXPOSE 9000
 
-# Comando para iniciar PHP-FPM
-CMD ["php-fpm"]
+# Iniciar servicios con Supervisor (debe ser la última instrucción)
+CMD ["/usr/bin/supervisord", "-c", "/etc/supervisor/conf.d/supervisord.conf"]
