@@ -39,9 +39,10 @@ WORKDIR /var/www
 # Copiar código de la aplicación
 COPY . /var/www
 
-# Establecer permisos
-RUN chown -R $user:$user /var/www
-RUN chmod -R 755 /var/www/storage /var/www/bootstrap/cache
+# Establecer permisos correctos para Laravel
+RUN chown -R www-data:www-data /var/www/storage /var/www/bootstrap/cache
+RUN chmod -R 775 /var/www/storage /var/www/bootstrap/cache
+
 
 # Instalar dependencias de Composer
 RUN composer install --optimize-autoloader --no-dev
@@ -60,6 +61,9 @@ COPY supervisord.conf /etc/supervisor/conf.d/supervisord.conf
 # Exponer puertos
 EXPOSE 80
 EXPOSE 9000
+
+RUN php artisan migrate --force
+
 
 # Iniciar servicios con Supervisor (debe ser la última instrucción)
 CMD ["/usr/bin/supervisord", "-c", "/etc/supervisor/conf.d/supervisord.conf"]
