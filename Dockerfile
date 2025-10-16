@@ -62,8 +62,6 @@ COPY supervisord.conf /etc/supervisor/conf.d/supervisord.conf
 EXPOSE 80
 EXPOSE 9000
 
-RUN php artisan migrate --force
-
 
 # Iniciar servicios con Supervisor (debe ser la última instrucción)
 CMD ["/usr/bin/supervisord", "-c", "/etc/supervisor/conf.d/supervisord.conf"]
