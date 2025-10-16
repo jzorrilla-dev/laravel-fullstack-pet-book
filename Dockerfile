@@ -25,6 +25,13 @@ RUN apt-get clean && rm -rf /var/lib/apt/lists/*
 # Instalar extensiones PHP
 RUN docker-php-ext-install pdo pdo_pgsql pgsql mbstring exif pcntl bcmath gd
 
+
+# --- FIX 413: Copiar la configuración de límites de PHP ---
+COPY uploads.ini /usr/local/etc/php/conf.d/uploads.ini
+# ---------------------------------------------------------
+
+
+
 # Obtener Composer
 COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
 
