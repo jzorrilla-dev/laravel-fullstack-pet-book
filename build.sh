@@ -5,6 +5,7 @@
 echo "🚀 Iniciando proceso de construcción..."
 
 # Copiar .env.example a .env
+# Esto es necesario para que `php artisan key:generate` funcione correctamente en el build
 echo "📝 Configurando variables de entorno..."
 cp .env.example .env
 
@@ -16,17 +17,17 @@ php artisan key:generate --force
 echo "📦 Instalando dependencias de PHP..."
 composer install --no-interaction --prefer-dist --optimize-autoloader --no-dev
 
-# Instalar dependencias de NPM y compilar assets
-echo "🎨 Compilando assets..."
+# Instalar dependencias de NPM, compilar assets y forzar la salida limpia.
+echo "🎨 Compilando assets con Vite..."
 npm ci
-npm run build
+# Este comando garantiza una compilación limpia y sin conflictos de caché en el Docker build
+npm run build -- --emptyOutDir 
 
 # Optimizar configuración
 echo "⚙️ Optimizando configuración..."
 php artisan config:cache
 php artisan route:cache
 php artisan view:cache
-
 
 # Crear enlace simbólico para almacenamiento
 echo "🔗 Configurando almacenamiento..."

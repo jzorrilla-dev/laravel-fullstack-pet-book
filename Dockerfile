@@ -49,6 +49,9 @@ RUN composer install --optimize-autoloader --no-dev
 
 # Instalar dependencias de NPM y compilar assets
 RUN npm install && npm run build
+# ... después de RUN npm run build
+RUN chown -R www-data:www-data /var/www/public/build
+# ...
 
 # Configurar Nginx
 COPY nginx.conf /etc/nginx/sites-available/default
