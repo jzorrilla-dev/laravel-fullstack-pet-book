@@ -58,10 +58,16 @@ RUN ln -sf /etc/nginx/sites-available/default /etc/nginx/sites-enabled/
 RUN mkdir -p /etc/supervisor/conf.d/
 COPY supervisord.conf /etc/supervisor/conf.d/supervisord.conf
 
+# === PASOS NUEVOS PARA EJECUTAR MIGRACIONES AL INICIO ===
+# Copiar script de entrada y darle permisos de ejecución
+COPY entrypoint.sh /usr/local/bin/entrypoint.sh
+RUN chmod +x /usr/local/bin/entrypoint.sh
+
 # Exponer puertos
 EXPOSE 80
 EXPOSE 9000
 
-
-# Iniciar servicios con Supervisor (debe ser la última instrucción)
-CMD ["/usr/bin/supervisord", "-c", "/etc/supervisor/conf.d/supervisord.conf"]
+# Definir el punto de entrada: ESTO se ejecuta primero al arrancar el contenedor.
+ENTRYPOINT ["/usr/local/bin/entrypoint.sh"]
+# El CMD es ahora ignorado.
+# CMD ["/usr/bin/supervisord", "-c", "/etc/supervisor/conf.d/supervisord.conf"]
