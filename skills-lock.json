@@ -1,0 +1,15 @@
+{
+  "version": 1,
+  "skills": {
+    "laravel-specialist": {
+      "source": "jeffallan/claude-skills",
+      "sourceType": "github",
+      "computedHash": "d42a21cb81a384d31b90d4a563570fa3e33441a6beb968487fcf95a338985a7e"
+    },
+    "supabase-postgres-best-practices": {
+      "source": "supabase/agent-skills",
+      "sourceType": "github",
+      "computedHash": "9c87c315aed143ee3b34bec8117100f5035e0df09e6b23e1ecc772cff434c9ad"
+    }
+  }
+}
