@@ -8,13 +8,30 @@
 .env
 .env.backup
 .env.production
+.env.*.local
 .phpunit.result.cache
 Homestead.json
 Homestead.yaml
 auth.json
 npm-debug.log
 yarn-error.log
+pnpm-lock.yaml
 /.fleet
 /.idea
 /.vscode
 estructura.txt
+
+# Laravel
+/storage/framework/cache/
+/storage/framework/sessions/
+/storage/framework/views/
+/storage/logs/
+/bootstrap/cache/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Editor backups
+*.swp
+*~
