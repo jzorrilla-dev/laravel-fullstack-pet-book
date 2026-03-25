@@ -1,17 +1,16 @@
 <?php
 
-use Illuminate\Support\Facades\Route;
-use App\Http\Controllers\PetController;
-use App\Http\Controllers\LostPetController;
 use App\Http\Controllers\AuthController;
-use App\Http\Controllers\ProfileController;
-use Illuminate\Support\Facades\Auth;
-use App\Http\Controllers\PostController;
 use App\Http\Controllers\CommentController;
+use App\Http\Controllers\LostPetController;
+use App\Http\Controllers\PetController;
+use App\Http\Controllers\PostController;
+use Illuminate\Support\Facades\Route;
 
 // Rutas públicas (sin autenticación)
 Route::get('/', [PetController::class, 'home'])->name('home');
 Route::get('/pets', [PetController::class, 'index'])->name('pets.index');
+Route::get('/pets/create', fn () => redirect()->route('login'))->name('pets.create');
 Route::get('/pets/{pet_id}', [PetController::class, 'show'])
     ->name('pets.show')
     ->where('pet_id', '[0-9]+'); // Ruta dinámica pública, solo números
