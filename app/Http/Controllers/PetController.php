@@ -2,13 +2,13 @@
 
 namespace App\Http\Controllers;
 
-use Illuminate\Http\Request;
+use App\Models\LostPet;
 use App\Models\Pet;
 use CloudinaryLabs\CloudinaryLaravel\Facades\Cloudinary;
-use Illuminate\Support\Facades\Log;
-use Illuminate\Support\Facades\Auth;
-use Illuminate\Validation\ValidationException;
 use Exception;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Log;
 
 class PetController extends Controller
 {
@@ -17,9 +17,10 @@ class PetController extends Controller
      */
     public function home()
     {
-        // Se eliminó la llamada a where() ya que este controlador solo maneja mascotas en adopción.
-        $pets = Pet::latest()->take(8)->get();
-        return view('home', compact('pets'));
+        $pets = Pet::latest()->take(9)->get();
+        $lostPets = LostPet::latest()->take(9)->get();
+
+        return view('home', compact('pets', 'lostPets'));
     }
 
     /**
@@ -27,8 +28,8 @@ class PetController extends Controller
      */
     public function index()
     {
-        // Se eliminó la llamada a where() ya que este controlador solo maneja mascotas en adopción.
-        $pets = Pet::latest()->get();
+        $pets = Pet::latest()->paginate(9);
+
         return view('pets.index', compact('pets'));
     }
 
@@ -68,7 +69,7 @@ class PetController extends Controller
         ]);
 
         try {
-            $pet = new Pet();
+            $pet = new Pet;
             $pet->pet_name = $request->pet_name;
             $pet->location = $request->location;
             $pet->description = $request->description ?? '';
@@ -89,7 +90,7 @@ class PetController extends Controller
                 $uploadedFile = $request->file('pet_photo');
                 $result = Cloudinary::upload($uploadedFile->getRealPath(), [
                     'folder' => 'pets',
-                    'public_id' => 'pet_' . time()
+                    'public_id' => 'pet_'.time(),
                 ]);
                 $pet->pet_photo = $result->getSecurePath();
             } else {
@@ -102,11 +103,11 @@ class PetController extends Controller
             return redirect()->route('pets.show', ['pet_id' => $pet->pet_id])
                 ->with('status', '¡Mascota registrada con éxito!');
         } catch (Exception $e) {
-            Log::error('Error al crear mascota: ' . $e->getMessage());
+            Log::error('Error al crear mascota: '.$e->getMessage());
+
             return back()->withInput()->with('error', 'Error al crear la mascota. Inténtalo de nuevo.');
         }
     }
-
 
     /**
      * Muestra el formulario para editar una mascota.
@@ -156,7 +157,7 @@ class PetController extends Controller
                 $uploadedFile = $request->file('pet_photo');
                 $result = Cloudinary::upload($uploadedFile->getRealPath(), [
                     'folder' => 'pets',
-                    'public_id' => 'pet_' . time(),
+                    'public_id' => 'pet_'.time(),
                 ]);
                 $pet->pet_photo = $result->getSecurePath();
             }
@@ -166,7 +167,8 @@ class PetController extends Controller
             return redirect()->route('pets.show', ['pet_id' => $pet->id])
                 ->with('status', '¡Mascota actualizada con éxito!');
         } catch (\Exception $e) {
-            Log::error('Error al actualizar mascota: ' . $e->getMessage());
+            Log::error('Error al actualizar mascota: '.$e->getMessage());
+
             return back()->withInput()->with('error', 'Error al actualizar la mascota. Inténtalo de nuevo.');
         }
     }
@@ -184,10 +186,12 @@ class PetController extends Controller
 
         try {
             $pet->delete();
+
             return redirect()->route('home')
                 ->with('status', '¡Mascota eliminada con éxito!');
         } catch (\Exception $e) {
-            Log::error('Error al eliminar mascota: ' . $e->getMessage());
+            Log::error('Error al eliminar mascota: '.$e->getMessage());
+
             return back()->with('error', 'Error al eliminar la mascota. Inténtalo de nuevo.');
         }
     }

@@ -2,12 +2,11 @@
 
 namespace App\Http\Controllers;
 
-use Illuminate\Http\Request;
 use App\Models\LostPet;
 use CloudinaryLabs\CloudinaryLaravel\Facades\Cloudinary;
-use Illuminate\Support\Facades\Log;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Validation\ValidationException;
+use Illuminate\Support\Facades\Log;
 
 class LostPetController extends Controller
 {
@@ -17,7 +16,7 @@ class LostPetController extends Controller
     public function index()
     {
         // Cargar la relación 'user' para incluir los datos del usuario
-        $lostPets = LostPet::with('user')->latest()->get();
+        $lostPets = LostPet::with('user')->latest()->paginate(9);
 
         // Devuelve la vista 'lostpets.index' y le pasa la colección de mascotas
         return view('lostpets.index', compact('lostPets'));
@@ -58,7 +57,7 @@ class LostPetController extends Controller
         ]);
 
         try {
-            $lostPet = new LostPet();
+            $lostPet = new LostPet;
             $lostPet->user_id = Auth::id(); // Obtiene el ID del usuario autenticado
             $lostPet->pet_name = $request->pet_name;
             $lostPet->last_seen = $request->last_seen;
@@ -70,7 +69,7 @@ class LostPetController extends Controller
                 $uploadedFile = $request->file('pet_photo');
                 $result = Cloudinary::upload($uploadedFile->getRealPath(), [
                     'folder' => 'lost_pets',
-                    'public_id' => 'lost_' . time(),
+                    'public_id' => 'lost_'.time(),
                 ]);
                 $lostPet->pet_photo = $result->getSecurePath();
             } else {
@@ -83,7 +82,8 @@ class LostPetController extends Controller
             return redirect()->route('lostpets.show', ['id' => $lostPet->id])
                 ->with('status', '¡Publicación de mascota perdida registrada con éxito!');
         } catch (\Exception $e) {
-            Log::error('Error al registrar mascota perdida: ' . $e->getMessage());
+            Log::error('Error al registrar mascota perdida: '.$e->getMessage());
+
             return back()->withInput()->with('error', 'Error al registrar la publicación. Inténtalo de nuevo.');
         }
     }
@@ -134,7 +134,7 @@ class LostPetController extends Controller
                 $uploadedFile = $request->file('pet_photo');
                 $result = Cloudinary::upload($uploadedFile->getRealPath(), [
                     'folder' => 'lost_pets',
-                    'public_id' => 'lost_' . time(),
+                    'public_id' => 'lost_'.time(),
                 ]);
                 $lostPet->pet_photo = $result->getSecurePath();
             }
@@ -144,7 +144,8 @@ class LostPetController extends Controller
             return redirect()->route('lostpets.show', ['id' => $lostPet->id])
                 ->with('status', '¡Publicación actualizada con éxito!');
         } catch (\Exception $e) {
-            Log::error('Error al actualizar mascota perdida: ' . $e->getMessage());
+            Log::error('Error al actualizar mascota perdida: '.$e->getMessage());
+
             return back()->withInput()->with('error', 'Error al actualizar la publicación. Inténtalo de nuevo.');
         }
     }
@@ -162,10 +163,12 @@ class LostPetController extends Controller
 
         try {
             $lostPet->delete();
+
             return redirect()->route('lostpets.index')
                 ->with('status', '¡Publicación eliminada con éxito!');
         } catch (\Exception $e) {
-            Log::error('Error al eliminar mascota perdida: ' . $e->getMessage());
+            Log::error('Error al eliminar mascota perdida: '.$e->getMessage());
+
             return back()->with('error', 'Error al eliminar la publicación. Inténtalo de nuevo.');
         }
     }
