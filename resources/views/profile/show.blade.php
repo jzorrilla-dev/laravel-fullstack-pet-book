@@ -9,9 +9,13 @@
             <div class="flex flex-col sm:flex-row items-center sm:items-end -mt-16 sm:-mt-12">
                 <!-- Avatar -->
                 <div class="bg-white rounded-full p-2 shadow-lg mb-4 sm:mb-0">
-                    <div class="w-24 h-24 sm:w-32 sm:h-32 bg-gradient-to-br from-blue-400 to-blue-600 rounded-full flex items-center justify-center text-white text-4xl sm:text-5xl font-bold">
-                        {{ strtoupper(substr($user->user_name, 0, 1)) }}
-                    </div>
+                    @if($user->photo)
+                        <img src="{{ $user->photo }}" alt="Foto de {{ $user->user_name }}" class="w-24 h-24 sm:w-32 sm:h-32 rounded-full object-cover">
+                    @else
+                        <div class="w-24 h-24 sm:w-32 sm:h-32 bg-gradient-to-br from-blue-400 to-blue-600 rounded-full flex items-center justify-center text-white text-4xl sm:text-5xl font-bold">
+                            {{ strtoupper(substr($user->user_name, 0, 1)) }}
+                        </div>
+                    @endif
                 </div>
                 
                 <!-- Información básica -->

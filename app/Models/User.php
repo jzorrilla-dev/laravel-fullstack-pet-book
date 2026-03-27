@@ -3,17 +3,17 @@
 namespace App\Models;
 
 // use Illuminate\Contracts\Auth\MustVerifyEmail;
+use App\Notifications\ResetPasswordNotification;
+use Illuminate\Auth\Passwords\CanResetPassword;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
-use Laravel\Sanctum\HasApiTokens;
-use Illuminate\Auth\Passwords\CanResetPassword;
-use App\Notifications\ResetPasswordNotification; // Importa tu notificador
+use Laravel\Sanctum\HasApiTokens; // Importa tu notificador
 
 class User extends Authenticatable
 {
     // <-- ¡Añade Notifiable y CanResetPassword aquí!
-    use HasFactory, Notifiable, CanResetPassword, HasApiTokens;
+    use CanResetPassword, HasApiTokens, HasFactory, Notifiable;
 
     protected $primaryKey = 'user_id'; // Clave primaria personalizada
 
@@ -24,6 +24,7 @@ class User extends Authenticatable
         'email',
         'password',
         'description',
+        'photo',
     ];
 
     protected $hidden = [

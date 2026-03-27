@@ -2,14 +2,13 @@
 
 namespace App\Http\Controllers;
 
-use Illuminate\Http\Request;
 use App\Models\User;
-use Illuminate\Support\Facades\Hash;
-use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Log;
-use Illuminate\Support\Facades\Password;
-use Illuminate\Validation\ValidationException;
 use Illuminate\Auth\Events\PasswordReset;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Password;
+use CloudinaryLabs\CloudinaryLaravel\Facades\Cloudinary;
 
 class AuthController extends Controller
 {
@@ -73,6 +72,7 @@ class AuthController extends Controller
 
         if (Auth::attempt($credentials)) {
             $request->session()->regenerate();
+
             return redirect()->intended(route('home'))->with('success', '¡Has iniciado sesión con éxito!');
         }
 
@@ -160,6 +160,7 @@ class AuthController extends Controller
     public function showProfile()
     {
         $user = Auth::user();
+
         return view('profile.show', compact('user'));
     }
 
@@ -169,6 +170,7 @@ class AuthController extends Controller
     public function editProfile()
     {
         $user = Auth::user();
+
         return view('profile.edit', compact('user'));
     }
 
@@ -187,6 +189,7 @@ class AuthController extends Controller
             'email' => ['required', 'string', 'email', 'max:255', 'unique:users,email,' . $user->user_id . ',user_id'],
             'description' => ['nullable', 'string', 'max:1000'],
             'password' => ['nullable', 'string', 'min:8', 'confirmed'],
+            'photo' => ['nullable', 'image', 'max:2048'],
         ]);
 
         // Actualizar campos básicos
@@ -199,6 +202,33 @@ class AuthController extends Controller
         // Actualizar password si se envió
         if (!empty($validated['password'])) {
             $user->password = Hash::make($validated['password']);
+        }
+
+        // Actualizar foto de perfil si se subió
+        if ($request->hasFile('photo') && $request->file('photo')->isValid()) {
+            // Eliminar foto anterior si existe y no es la default
+            if ($user->photo && strpos($user->photo, 'cloudinary') !== false) {
+                try {
+                    $publicId = pathinfo(parse_url($user->photo, PHP_URL_PATH), PATHINFO_FILENAME);
+                    Cloudinary::destroy('profile_photos/' . $publicId);
+                } catch (\Exception $e) {
+                    Log::warning('No se pudo eliminar la foto anterior: ' . $e->getMessage());
+                }
+            }
+
+            // Subir nueva foto
+            $uploadedFile = $request->file('photo');
+            $result = Cloudinary::upload($uploadedFile->getRealPath(), [
+                'folder' => 'profile_photos',
+                'public_id' => 'profile_' . $user->user_id,
+                'transformation' => [
+                    'width' => 400,
+                    'height' => 400,
+                    'crop' => 'fill',
+                    'gravity' => 'face',
+                ]
+            ]);
+            $user->photo = $result->getSecurePath();
         }
 
         $user->save();

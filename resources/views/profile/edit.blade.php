@@ -19,9 +19,29 @@
             </div>
         @endif
 
-        <form action="{{ route('profile.update') }}" method="POST" class="space-y-6">
+        <form action="{{ route('profile.update') }}" method="POST" enctype="multipart/form-data" class="space-y-6">
             @csrf
             @method('PUT')
+
+            <!-- Foto de perfil -->
+            <div class="flex flex-col items-center mb-6">
+                <div class="relative mb-4">
+                    <div class="w-32 h-32 rounded-full overflow-hidden bg-gray-200 ring-4 ring-gray-100" id="avatar-preview">
+                        @if($user->photo)
+                            <img src="{{ $user->photo }}" alt="Foto de perfil" class="w-full h-full object-cover" id="avatar-image">
+                        @else
+                            <div class="w-full h-full bg-gradient-to-br from-blue-400 to-blue-600 flex items-center justify-center text-white text-5xl font-bold" id="avatar-placeholder">
+                                {{ strtoupper(substr($user->user_name, 0, 1)) }}
+                            </div>
+                        @endif
+                    </div>
+                    <label for="photo" class="absolute bottom-0 right-0 bg-blue-600 text-white p-2 rounded-full cursor-pointer hover:bg-blue-700 transition shadow-lg">
+                        <i class="fa-solid fa-camera"></i>
+                    </label>
+                    <input type="file" id="photo" name="photo" accept="image/*" class="hidden" onchange="previewImage(this)">
+                </div>
+                <p class="text-sm text-gray-500">Click en el ícono para cambiar tu foto</p>
+            </div>
 
             <div>
                 <label for="user_name" class="block text-sm font-medium text-gray-700">Nombre</label>
@@ -78,4 +98,19 @@
         </form>
     </div>
 </div>
+
+@push('scripts')
+<script>
+function previewImage(input) {
+    if (input.files && input.files[0]) {
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            const preview = document.getElementById('avatar-preview');
+            preview.innerHTML = '<img src="' + e.target.result + '" alt="Foto de perfil" class="w-full h-full object-cover">';
+        }
+        reader.readAsDataURL(input.files[0]);
+    }
+}
+</script>
+@endpush
 @endsection
