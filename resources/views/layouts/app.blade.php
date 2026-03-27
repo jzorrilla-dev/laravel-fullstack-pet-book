@@ -233,42 +233,70 @@
                 </div>
 
                 <!-- Footer -->
-                <footer class="bg-white border-t border-gray-200 mt-auto">
-                    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-7 py-7">
-                        <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+                <footer class="bg-sky-500 text-white mt-auto">
+                    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-7 py-12">
+                        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
                             <!-- Columna 1: Sobre Petbook -->
-                            <div>
-                                <h3 class="text-lg font-semibold text-gray-800 mb-4 flex items-center gap-2">
-                                    <i class="fa-solid fa-paw text-orange-500"></i>
-                                    Petbook
-                                </h3>
-                                <p class="text-gray-600 text-sm leading-relaxed">
-                                    Plataforma dedicada a conectar mascotas con hogares amorosos y ayudar a reunir mascotas perdidas con sus familias.
+                            <div class="lg:col-span-1">
+                                <div class="flex items-center gap-3 mb-4">
+                                    <div class="bg-white/20 p-3 rounded-xl">
+                                        <i class="fa-solid fa-paw text-2xl"></i>
+                                    </div>
+                                    <div>
+                                        <h3 class="text-xl font-bold">Petbook</h3>
+                                        <p class="text-xs text-sky-100">Tu comunidad de mascotas</p>
+                                    </div>
+                                </div>
+                                <p class="text-sky-50 text-sm leading-relaxed mb-4">
+                                    Plataforma dedicada a conectar mascotas con hogares amorosos y ayudar a reunirlas con sus familias.
                                 </p>
+                                <!-- Redes sociales -->
+                                <div class="flex gap-3">
+                                    <a href="#" class="bg-white/10 hover:bg-white/20 p-2 rounded-lg transition" aria-label="Facebook">
+                                        <i class="fa-brands fa-facebook-f"></i>
+                                    </a>
+                                    <a href="#" class="bg-white/10 hover:bg-white/20 p-2 rounded-lg transition" aria-label="Twitter">
+                                        <i class="fa-brands fa-twitter"></i>
+                                    </a>
+                                    <a href="#" class="bg-white/10 hover:bg-white/20 p-2 rounded-lg transition" aria-label="Instagram">
+                                        <i class="fa-brands fa-instagram"></i>
+                                    </a>
+                                    <a href="#" class="bg-white/10 hover:bg-white/20 p-2 rounded-lg transition" aria-label="YouTube">
+                                        <i class="fa-brands fa-youtube"></i>
+                                    </a>
+                                </div>
                             </div>
 
                             <!-- Columna 2: Enlaces rápidos -->
                             <div>
-                                <h3 class="text-lg font-semibold text-gray-800 mb-4">Enlaces Rápidos</h3>
-                                <ul class="space-y-2 text-sm">
+                                <h3 class="text-lg font-semibold mb-4 flex items-center gap-2">
+                                    <i class="fa-solid fa-link text-sky-200"></i>
+                                    Enlaces Rápidos
+                                </h3>
+                                <ul class="space-y-3 text-sm">
                                     <li>
-                                        <a href="{{ route('home') }}" class="text-gray-600 hover:text-blue-600 transition">
-                                            <i class="fa-solid fa-chevron-right text-xs mr-1"></i>Inicio
+                                        <a href="{{ route('home') }}" class="text-sky-100 hover:text-white hover:pl-2 transition-all flex items-center gap-2">
+                                            <i class="fa-solid fa-chevron-right text-xs text-sky-200"></i>Inicio
                                         </a>
                                     </li>
                                     <li>
-                                        <a href="{{ route('pets.index') }}" class="text-gray-600 hover:text-blue-600 transition">
-                                            <i class="fa-solid fa-chevron-right text-xs mr-1"></i>Mascotas en Adopción
+                                        <a href="{{ route('pets.index') }}" class="text-sky-100 hover:text-white hover:pl-2 transition-all flex items-center gap-2">
+                                            <i class="fa-solid fa-chevron-right text-xs text-sky-200"></i>Mascotas en Adopción
                                         </a>
                                     </li>
                                     <li>
-                                        <a href="{{ route('lostpets.index') }}" class="text-gray-600 hover:text-blue-600 transition">
-                                            <i class="fa-solid fa-chevron-right text-xs mr-1"></i>Mascotas Perdidas
+                                        <a href="{{ route('lostpets.index') }}" class="text-sky-100 hover:text-white hover:pl-2 transition-all flex items-center gap-2">
+                                            <i class="fa-solid fa-chevron-right text-xs text-sky-200"></i>Mascotas Perdidas
                                         </a>
                                     </li>
                                     <li>
-                                        <a href="{{ route('about') }}" class="text-gray-600 hover:text-blue-600 transition">
-                                            <i class="fa-solid fa-chevron-right text-xs mr-1"></i>Acerca de
+                                        <a href="{{ route('posts.index') }}" class="text-sky-100 hover:text-white hover:pl-2 transition-all flex items-center gap-2">
+                                            <i class="fa-solid fa-chevron-right text-xs text-sky-200"></i>Blog
+                                        </a>
+                                    </li>
+                                    <li>
+                                        <a href="{{ route('about') }}" class="text-sky-100 hover:text-white hover:pl-2 transition-all flex items-center gap-2">
+                                            <i class="fa-solid fa-chevron-right text-xs text-sky-200"></i>Acerca de
                                         </a>
                                     </li>
                                 </ul>
@@ -276,32 +304,65 @@
 
                             <!-- Columna 3: Contacto -->
                             <div>
-                                <h3 class="text-lg font-semibold text-gray-800 mb-4">Contacto</h3>
+                                <h3 class="text-lg font-semibold mb-4 flex items-center gap-2">
+                                    <i class="fa-solid fa-envelope text-sky-200"></i>
+                                    Contacto
+                                </h3>
                                 <ul class="space-y-3 text-sm">
-                                    <li class="flex items-start gap-2 text-gray-600">
-                                        <i class="fa-solid fa-envelope text-blue-600 mt-1"></i>
-                                        <a href="mailto:{{ config('mail.from.address') }}" class="hover:text-blue-600 transition">
+                                    <li class="flex items-start gap-3 text-sky-100">
+                                        <i class="fa-solid fa-envelope mt-1 text-sky-200"></i>
+                                        <a href="mailto:{{ config('mail.from.address') }}" class="hover:text-white transition">
                                             {{ config('mail.from.address') }}
                                         </a>
                                     </li>
-                                    <li class="flex items-start gap-2 text-gray-600">
-                                        <i class="fa-solid fa-phone text-blue-600 mt-1"></i>
+                                    <li class="flex items-start gap-3 text-sky-100">
+                                        <i class="fa-solid fa-phone mt-1 text-sky-200"></i>
                                         <span>{{ env('APP_CONTACT_PHONE', '+54 ...') }}</span>
                                     </li>
-                                    <li>
-                                        <a href="{{ route('contactos') }}" class="inline-block bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition text-sm font-medium">
-                                            <i class="fa-solid fa-paper-plane mr-1"></i>Contáctanos
-                                        </a>
+                                    <li class="flex items-start gap-3 text-sky-100">
+                                        <i class="fa-solid fa-location-dot mt-1 text-sky-200"></i>
+                                        <span>Argentina</span>
                                     </li>
                                 </ul>
+                                <a href="{{ route('contactos') }}" class="inline-flex items-center gap-2 bg-white text-sky-600 px-5 py-2.5 rounded-lg font-medium hover:bg-sky-50 transition mt-4">
+                                    <i class="fa-solid fa-paper-plane"></i>
+                                    Contáctanos
+                                </a>
+                            </div>
+
+                            <!-- Columna 4: Newsletter -->
+                            <div>
+                                <h3 class="text-lg font-semibold mb-4 flex items-center gap-2">
+                                    <i class="fa-solid fa-bell text-sky-200"></i>
+                                    Newsletter
+                                </h3>
+                                <p class="text-sky-100 text-sm mb-4">
+                                    Recibe las últimas noticias sobre mascotas en adopción y mascotas perdidas.
+                                </p>
+                                <form class="flex flex-col gap-2">
+                                    <input type="email" 
+                                        placeholder="Tu correo electrónico" 
+                                        class="w-full px-4 py-2.5 rounded-lg bg-white/10 border border-white/20 text-white placeholder-sky-200 focus:outline-none focus:ring-2 focus:ring-white/50 focus:border-transparent"
+                                    >
+                                    <button type="submit" 
+                                        class="w-full bg-white text-sky-600 px-4 py-2.5 rounded-lg font-medium hover:bg-sky-50 transition flex items-center justify-center gap-2">
+                                        <i class="fa-solid fa-paper-plane"></i>
+                                        Suscribirse
+                                    </button>
+                                </form>
                             </div>
                         </div>
 
                         <!-- Separador y copyright -->
-                        <div class="border-t border-gray-200 mt-8 pt-6 text-center">
-                            <p class="text-sm text-gray-500">
-                                © {{ date('Y') }} Petbook. Hecho <i class="fa-solid fa-heart text-red-500"></i> para los amantes de las mascotas.
-                            </p>
+                        <div class="border-t border-white/20 mt-10 pt-6">
+                            <div class="flex flex-col md:flex-row justify-between items-center gap-4">
+                                <p class="text-sm text-sky-100">
+                                    © {{ date('Y') }} <span class="font-semibold">Petbook</span>. Todos los derechos reservados.
+                                </p>
+                                <p class="text-sm text-sky-200 flex items-center gap-1">
+                                    Hecho con <i class="fa-solid fa-heart text-red-300"></i> para los amantes de las mascotas
+                                </p>
+                            </div>
                         </div>
                     </div>
                 </footer>
