@@ -5,9 +5,9 @@ namespace App\Http\Controllers;
 use App\Models\Donation;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
-use Stripe\Stripe;
 use Stripe\Checkout\Session;
 use Stripe\Exception\ApiErrorException;
+use Stripe\Stripe;
 
 class DonationController extends Controller
 {
@@ -15,12 +15,12 @@ class DonationController extends Controller
     {
         return view('donations.index');
     }
-    
+
     public function create()
     {
         return view('donations.create');
     }
-    
+
     public function checkout(Request $request)
     {
         $request->validate([
@@ -29,10 +29,10 @@ class DonationController extends Controller
             'donor_email' => 'nullable|email|max:255',
             'message' => 'nullable|string|max:1000',
         ]);
-        
+
         // Configurar Stripe con la clave secreta
         Stripe::setApiKey(config('services.stripe.secret'));
-        
+
         try {
             $session = Session::create([
                 'payment_method_types' => ['card'],
@@ -47,7 +47,7 @@ class DonationController extends Controller
                     'quantity' => 1,
                 ]],
                 'mode' => 'payment',
-                'success_url' => route('donations.success') . '?session_id={CHECKOUT_SESSION_ID}',
+                'success_url' => route('donations.success').'?session_id={CHECKOUT_SESSION_ID}',
                 'cancel_url' => route('donations.cancel'),
                 'metadata' => [
                     'donor_name' => $request->donor_name,
@@ -56,7 +56,7 @@ class DonationController extends Controller
                     'user_id' => Auth::id(),
                 ],
             ]);
-            
+
             // Guardar la donación en la base de datos con estado pendiente
             Donation::create([
                 'user_id' => Auth::id(),
@@ -69,26 +69,26 @@ class DonationController extends Controller
                 'donor_email' => $request->donor_email,
                 'message' => $request->message,
             ]);
-            
+
             return redirect($session->url);
         } catch (ApiErrorException $e) {
             return back()->withErrors(['error' => $e->getMessage()]);
         }
     }
-    
+
     public function success(Request $request)
     {
         if ($request->session_id) {
             $donation = Donation::where('payment_id', $request->session_id)->first();
-            
+
             if ($donation) {
                 $donation->update(['status' => 'completed']);
             }
         }
-        
+
         return view('donations.success');
     }
-    
+
     public function cancel()
     {
         return view('donations.cancel');

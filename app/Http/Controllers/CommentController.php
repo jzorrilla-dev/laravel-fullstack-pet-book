@@ -2,10 +2,10 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Comment;
 use App\Models\Post;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
-use App\Models\Comment;
 
 class CommentController extends Controller
 {
@@ -54,6 +54,7 @@ class CommentController extends Controller
     public function destroy(Comment $comment)
     {
         $comment->delete();
+
         return redirect()->route('posts.show', $comment->post)->with('success', 'Comment deleted successfully.');
     }
 }

@@ -43,7 +43,7 @@ return [
         'sanctum' => [
             'driver' => 'sanctum',
             'provider' => 'users',
-        ]
+        ],
     ],
 
     /*
@@ -100,10 +100,9 @@ return [
             'table' => 'password_reset_tokens',
             'expire' => 60,
             'throttle' => 60,
-            'front_end_url' => env('FRONTEND_URL') . '/reset-password', // <-- ¡Añade esta línea!
+            'front_end_url' => env('FRONTEND_URL').'/reset-password', // <-- ¡Añade esta línea!
         ],
     ],
-
 
     /*
     |--------------------------------------------------------------------------
