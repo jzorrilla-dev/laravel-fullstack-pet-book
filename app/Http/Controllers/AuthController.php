@@ -3,12 +3,12 @@
 namespace App\Http\Controllers;
 
 use App\Models\User;
+use CloudinaryLabs\CloudinaryLaravel\Facades\Cloudinary;
 use Illuminate\Auth\Events\PasswordReset;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Password;
-use CloudinaryLabs\CloudinaryLaravel\Facades\Cloudinary;
 
 class AuthController extends Controller
 {
@@ -186,7 +186,7 @@ class AuthController extends Controller
             'user_name' => ['required', 'string', 'max:255'],
             'user_phone' => ['required', 'string', 'max:20'],
             'city' => ['required', 'string', 'max:100'],
-            'email' => ['required', 'string', 'email', 'max:255', 'unique:users,email,' . $user->user_id . ',user_id'],
+            'email' => ['required', 'string', 'email', 'max:255', 'unique:users,email,'.$user->user_id.',user_id'],
             'description' => ['nullable', 'string', 'max:1000'],
             'password' => ['nullable', 'string', 'min:8', 'confirmed'],
             'photo' => ['nullable', 'image', 'max:2048'],
@@ -200,7 +200,7 @@ class AuthController extends Controller
         $user->description = $validated['description'] ?? $user->description;
 
         // Actualizar password si se envió
-        if (!empty($validated['password'])) {
+        if (! empty($validated['password'])) {
             $user->password = Hash::make($validated['password']);
         }
 
@@ -210,9 +210,9 @@ class AuthController extends Controller
             if ($user->photo && strpos($user->photo, 'cloudinary') !== false) {
                 try {
                     $publicId = pathinfo(parse_url($user->photo, PHP_URL_PATH), PATHINFO_FILENAME);
-                    Cloudinary::destroy('profile_photos/' . $publicId);
+                    Cloudinary::destroy('profile_photos/'.$publicId);
                 } catch (\Exception $e) {
-                    Log::warning('No se pudo eliminar la foto anterior: ' . $e->getMessage());
+                    Log::warning('No se pudo eliminar la foto anterior: '.$e->getMessage());
                 }
             }
 
@@ -220,13 +220,13 @@ class AuthController extends Controller
             $uploadedFile = $request->file('photo');
             $result = Cloudinary::upload($uploadedFile->getRealPath(), [
                 'folder' => 'profile_photos',
-                'public_id' => 'profile_' . $user->user_id,
+                'public_id' => 'profile_'.$user->user_id,
                 'transformation' => [
                     'width' => 400,
                     'height' => 400,
                     'crop' => 'fill',
                     'gravity' => 'face',
-                ]
+                ],
             ]);
             $user->photo = $result->getSecurePath();
         }
@@ -234,5 +234,37 @@ class AuthController extends Controller
         $user->save();
 
         return redirect()->route('profile')->with('success', 'Perfil actualizado correctamente.');
+    }
+
+    public function destroyAccount(Request $request): \Illuminate\Http\RedirectResponse
+    {
+        $user = Auth::user();
+
+        $validated = $request->validate([
+            'password' => ['required', 'string'],
+            'confirm_deletion' => ['accepted'],
+        ]);
+
+        if (! Hash::check($validated['password'], $user->password)) {
+            return back()->withErrors(['password' => 'La contraseña proporcionada es incorrecta.'])->withInput();
+        }
+
+        if ($user->photo && strpos($user->photo, 'cloudinary') !== false) {
+            try {
+                $publicId = pathinfo(parse_url($user->photo, PHP_URL_PATH), PATHINFO_FILENAME);
+                Cloudinary::destroy('profile_photos/'.$publicId);
+            } catch (\Exception $e) {
+                logger()->warning('No se pudo eliminar la foto de perfil: '.$e->getMessage());
+            }
+        }
+
+        $userName = $user->user_name;
+        $user->delete();
+
+        Auth::guard('web')->logout();
+        $request->session()->invalidate();
+        $request->session()->regenerateToken();
+
+        return redirect()->route('home')->with('success', "¡Tu cuenta ha sido eliminada correctamente! Gracias por usar PetBook, {$userName}. Te extrañaremos.");
     }
 }

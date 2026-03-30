@@ -78,6 +78,7 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/user/profile', [AuthController::class, 'showProfile'])->name('profile');
     Route::get('/user/profile/edit', [AuthController::class, 'editProfile'])->name('profile.edit');
     Route::put('/user/profile', [AuthController::class, 'updateProfile'])->name('profile.update');
+    Route::delete('/user/profile', [AuthController::class, 'destroyAccount'])->name('profile.destroy');
 
     // Rutas para mascotas
     Route::get('/pets/create', [PetController::class, 'create'])->name('pets.create');
