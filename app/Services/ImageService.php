@@ -36,7 +36,7 @@ final class ImageService
 
         try {
             $publicId = $this->extractPublicId($url);
-            Cloudinary::destroy($folder.'/'.$publicId);
+            Cloudinary::destroy($publicId);
         } catch (\Exception $e) {
             logger()->warning('No se pudo eliminar la imagen: '.$e->getMessage());
         }

@@ -1,0 +1,13 @@
+includes:
+    - vendor/larastan/larastan/extension.neon
+
+parameters:
+    paths:
+        - app/
+
+    level: 3
+
+    excludePaths:
+        - app/Http/Middleware/*
+        - app/Providers/BroadcastServiceProvider.php
+        - app/Http/Controllers/SocialAuthController.php
