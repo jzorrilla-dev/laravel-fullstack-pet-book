@@ -1,0 +1,34 @@
+# Dependencias (Se instalarán dentro del contenedor)
+node_modules
+vendor
+
+# Archivos de entorno y configuración local
+.env
+.env.*
+phpunit.xml
+auth.json
+
+# Logs y Cache de Laravel
+storage/logs/*.log
+storage/framework/sessions/*
+storage/framework/views/*.php
+storage/framework/cache/data/*
+bootstrap/cache/*.php
+
+# Git y herramientas
+.git
+.gitignore
+.gitattributes
+.github
+.editorconfig
+.styleci.yml
+
+# Docker (No necesitas el Dockerfile dentro del propio contenedor)
+Dockerfile
+.dockerignore
+docker-compose.yml
+docker-compose.override.yml
+
+# Assets compilados localmente (Para que el contenedor los genere de cero)
+public/storage
+public/build
