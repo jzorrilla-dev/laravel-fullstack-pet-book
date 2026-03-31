@@ -1,27 +1,24 @@
 #!/bin/bash
 
-# Script de construcción para Render.com
-
 echo "🚀 Iniciando proceso de construcción..."
 
-# Copiar .env.example a .env
-# Esto es necesario para que `php artisan key:generate` funcione correctamente en el build
-echo "📝 Configurando variables de entorno..."
-cp .env.example .env
-
-# Generar clave de aplicación
-echo "🔑 Generando clave de aplicación..."
-php artisan key:generate --force
+# Solo generar APP_KEY si no está configurada (primera vez en nuevo entorno)
+echo "🔑 Verificando APP_KEY..."
+if [ -z "$APP_KEY" ]; then
+    echo "⚠️  APP_KEY no encontrada en Variables de Entorno. Generando..."
+    php artisan key:generate
+else
+    echo "✅ APP_KEY ya configurada en Variables de Entorno, omitiendo..."
+fi
 
 # Instalar dependencias de Composer
 echo "📦 Instalando dependencias de PHP..."
 composer install --no-interaction --prefer-dist --optimize-autoloader --no-dev
 
-# Instalar dependencias de NPM, compilar assets y forzar la salida limpia.
-echo "🎨 Compilando assets con Vite..."
-npm ci
-# Este comando garantiza una compilación limpia y sin conflictos de caché en el Docker build
-npm run build -- --emptyOutDir 
+# Instalar y compilar assets con pnpm
+echo "🎨 Compilando assets con pnpm..."
+pnpm install
+pnpm build
 
 # Optimizar configuración
 echo "⚙️ Optimizando configuración..."
