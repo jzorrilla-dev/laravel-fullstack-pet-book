@@ -27,15 +27,15 @@ PetBook es una aplicación web desarrollada con Laravel y Tailwind CSS que facil
    cd laravel-fullstack-pet-book
    ```
 
-2. Levantar contenedores Docker:
-   ```
-   ./vendor/bin/sail up -d
-   ```
+ 2. Levantar contenedores Docker:
+    ```
+    ./vendor/bin/sail up -d
+    ```
 
-3. Instalar dependencias de JavaScript (usar pnpm, NO npm):
-   ```
-   pnpm install
-   ```
+3. Instalar dependencias de JavaScript (usar pnpm, NO npm - ejecutar FUERA de sail):
+    ```
+    pnpm install
+    ```
 
 4. Copiar el archivo de entorno:
    ```

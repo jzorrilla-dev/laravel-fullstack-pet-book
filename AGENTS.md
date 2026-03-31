@@ -14,6 +14,16 @@ This file provides guidelines for agentic coding agents working in this Laravel 
 
 ### IMPORTANTE: Cómo ejecutar comandos correctamente
 
+**Regla principal: siempre ejecutar pnpm directamente (fuera de sail)**
+```bash
+# ✅ CORRECTO - ejecutar pnpm fuera de sail
+pnpm install
+pnpm build
+
+# ❌ INCORRECTO - NO usar sail para pnpm
+./vendor/bin/sail pnpm install
+```
+
 **Forma correcta de usar Sail:**
 ```bash
 # Verificar que los contenedores estén corriendo primero
