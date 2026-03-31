@@ -159,4 +159,4 @@ Este proyecto está licenciado bajo [MIT License](LICENSE).
 
 ## Contacto
 
-Para más información, contacta a [tu-email@ejemplo.com](mailto:tu-email@ejemplo.com)
+Para más información, contacta a [emiliozorrillacabral@hotmail.com](mailto:emiliozorrillacabral@hotmail.com)
