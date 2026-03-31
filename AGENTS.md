@@ -12,42 +12,69 @@ This file provides guidelines for agentic coding agents working in this Laravel 
 
 ## Build / Lint / Test Commands
 
+### IMPORTANTE: Cómo ejecutar comandos correctamente
+
+**Forma correcta de usar Sail:**
+```bash
+# Verificar que los contenedores estén corriendo primero
+docker ps
+
+# Luego ejecutar comandos con la sintaxis correcta
+./vendor/bin/sail up -d                          # Levantar contenedores
+./vendor/bin/sail php artisan test               # Ejecutar tests
+./vendor/bin/sail php vendor/bin/pint            # Ejecutar Pint
+./vendor/bin/sail php vendor/bin/phpstan analyse # Ejecutar PHPStan
+```
+
+**Errores comunes a evitar:**
+```bash
+# ❌ INCORRECTO - agregar ./vendor/bin/ en medio
+./vendor/bin/sail ./vendor/bin/pint
+
+# ✅ CORRECTO - usar 'php' directamente después de 'sail'
+./vendor/bin/sail php vendor/bin/pint
+./vendor/bin/sail php artisan route:list
+```
+
 ### PHP/Laravel Commands (usar Sail)
 
 ```bash
 # Run all tests
-sail php artisan test
+./vendor/bin/sail php artisan test
 
 # Run a single test (filter by name)
-sail php artisan test --filter=test_name_here
+./vendor/bin/sail php artisan test --filter=test_name_here
 
 # Run tests with coverage
-sail php artisan test --coverage
+./vendor/bin/sail php artisan test --coverage
 
 # Run specific test suite
-sail ./vendor/bin/phpunit --testsuite=Unit
-sail ./vendor/bin/phpunit --testsuite=Feature
+./vendor/bin/sail php vendor/bin/phpunit --testsuite=Unit
+./vendor/bin/sail php vendor/bin/phpunit --testsuite=Feature
 
 # Run a specific test file
-sail ./vendor/bin/phpunit tests/Feature/ExampleTest.php
+./vendor/bin/sail php vendor/bin/phpunit tests/Feature/ExampleTest.php
 
 # Run a specific test method
-sail ./vendor/bin/phpunit tests/Feature/ExampleTest.php --filter=test_the_application_returns_a_successful_response
+./vendor/bin/sail php vendor/bin/phpunit tests/Feature/ExampleTest.php --filter=test_the_application_returns_a_successful_response
 
 # Lint PHP code (Pint - PSR-12)
-sail ./vendor/bin/pint
+./vendor/bin/sail php vendor/bin/pint
 
 # Lint with dry-run (check without fixing)
-sail ./vendor/bin/pint --test
+./vendor/bin/sail php vendor/bin/pint --test
+
+# Static analysis with PHPStan/Larastan (nivel 3)
+./vendor/bin/sail php vendor/bin/phpstan analyse
 
 # Check route list
-sail php artisan route:list
+./vendor/bin/sail php artisan route:list
 
 # Check migrations status
-sail php artisan migrate:status
+./vendor/bin/sail php artisan migrate:status
 
 # Generate app key
-sail php artisan key:generate
+./vendor/bin/sail php artisan key:generate
 ```
 
 ### Frontend Commands
@@ -68,15 +95,38 @@ pnpm build
 ### Docker Commands
 
 ```bash
-# Build and start containers (usar sail si el alias no funciona)
+# Build and start containers (SIEMPRE usar ./vendor/bin/sail)
 ./vendor/bin/sail up -d
 
-# Run artisan in container
-sail php artisan test
+# Verificar estado de contenedores
+docker ps
 
-# Run tests in container
-sail ./vendor/bin/phpunit
+# Ver logs de un contenedor específico
+docker logs laravel-fullstack-pet-book-laravel.test-1
+
+# Ejecutar comandos directamente en el contenedor (alternativa a sail)
+docker exec laravel-fullstack-pet-book-laravel.test-1 php artisan test
+docker exec laravel-fullstack-pet-book-laravel.test-1 php vendor/bin/pint
+docker exec laravel-fullstack-pet-book-laravel.test-1 php vendor/bin/phpstan analyse
 ```
+
+### Static Analysis (PHPStan/Larastan)
+
+Este proyecto incluye configuración de Laravel para análisis estático:
+
+```bash
+# Ejecutar análisis estático
+./vendor/bin/sail php vendor/bin/phpstan analyse
+
+# Nivel configurado: 3 (balance entre rigurosidad y viabilidad)
+# Archivos analizados: app/
+# Excluidos: Middleware de Laravel, SocialAuthController
+```
+
+**Errores comunes de PHPStan y cómo resolverlos:**
+- Métodos sin return type → Agregar tipo de retorno al método
+- Relaciones sin tipos genéricos → Usar `BelongsTo<User>`, `HasMany<Post>`
+- Arrays sin tipos → Usar `array<string, mixed>` o similar
 
 ## Code Style Guidelines
 

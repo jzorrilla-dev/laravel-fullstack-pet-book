@@ -12,11 +12,12 @@ PetBook es una aplicación web desarrollada con Laravel y Tailwind CSS que facil
 
 ## Requisitos Técnicos
 
-- PHP 8.1 o superior
+- PHP 8.2 o superior
 - Composer
-- Node.js y NPM
-- MySQL o PostgreSQL
-- Extensiones PHP: BCMath, Ctype, JSON, Mbstring, OpenSSL, PDO, Tokenizer, XML
+- Node.js y pnpm (NO usar npm)
+- PostgreSQL (vía Supabase)
+- Docker y Docker Compose
+- Extensiones PHP: BCMath, Ctype, JSON, Mbstring, OpenSSL, PDO, Tokenizer, XML, GD
 
 ## Instalación
 
@@ -26,14 +27,14 @@ PetBook es una aplicación web desarrollada con Laravel y Tailwind CSS que facil
    cd laravel-fullstack-pet-book
    ```
 
-2. Instalar dependencias de PHP:
+2. Levantar contenedores Docker:
    ```
-   composer install
+   ./vendor/bin/sail up -d
    ```
 
-3. Instalar dependencias de JavaScript:
+3. Instalar dependencias de JavaScript (usar pnpm, NO npm):
    ```
-   npm install
+   pnpm install
    ```
 
 4. Copiar el archivo de entorno:
@@ -43,25 +44,77 @@ PetBook es una aplicación web desarrollada con Laravel y Tailwind CSS que facil
 
 5. Generar clave de aplicación:
    ```
-   php artisan key:generate
+   ./vendor/bin/sail php artisan key:generate
    ```
 
-6. Configurar la base de datos en el archivo `.env`
+6. Configurar la base de datos en el archivo `.env` (Supabase)
 
 7. Ejecutar migraciones:
    ```
-   php artisan migrate
+   ./vendor/bin/sail php artisan migrate
    ```
 
 8. Compilar assets:
    ```
-   npm run dev
+   pnpm build
    ```
 
-9. Iniciar el servidor:
-   ```
-   php artisan serve
-   ```
+## Comandos Útiles
+
+### Desarrollo
+```bash
+# Levantar contenedores
+./vendor/bin/sail up -d
+
+# Ver contenedores activos
+docker ps
+
+# Ver logs
+docker logs laravel-fullstack-pet-book-laravel.test-1
+
+# Detener contenedores
+./vendor/bin/sail down
+```
+
+### Testing y Linting
+```bash
+# Ejecutar tests
+./vendor/bin/sail php artisan test
+
+# Ejecutar tests con cobertura
+./vendor/bin/sail php artisan test --coverage
+
+# Linting con Pint
+./vendor/bin/sail php vendor/bin/pint
+
+# Análisis estático con PHPStan
+./vendor/bin/sail php vendor/bin/phpstan analyse
+```
+
+### Bases de Datos
+```bash
+# Ejecutar migraciones
+./vendor/bin/sail php artisan migrate
+
+# Rollback de migraciones
+./vendor/bin/sail php artisan migrate:rollback
+
+# Seed de base de datos
+./vendor/bin/sail php artisan db:seed
+
+# Ver estado de migraciones
+./vendor/bin/sail php artisan migrate:status
+```
+
+## Stack Tecnológico
+
+- **Backend**: Laravel 10+ con PHP 8.2+
+- **Base de datos**: PostgreSQL (Supabase)
+- **Frontend**: Blade templates + Tailwind CSS + Alpine.js
+- **Imágenes**: Cloudinary
+- **Testing**: Pest
+- **Linting**: Laravel Pint (PSR-12)
+- **Static Analysis**: PHPStan/Larastan (nivel 3)
 
 ## Estructura del Proyecto
 
@@ -86,9 +139,19 @@ Si deseas contribuir al proyecto, por favor:
 
 1. Crea un fork del repositorio
 2. Crea una rama para tu funcionalidad (`git checkout -b feature/nueva-funcionalidad`)
-3. Realiza tus cambios y haz commit (`git commit -m 'Añadir nueva funcionalidad'`)
-4. Sube tus cambios (`git push origin feature/nueva-funcionalidad`)
-5. Abre un Pull Request
+3. Realiza tus cambios y haz commit (`git commit -m 'feat: añadir nueva funcionalidad'`)
+4. Ejecuta lint y tests antes de hacer commit:
+   ```
+   ./vendor/bin/sail php vendor/bin/pint
+   ./vendor/bin/sail php vendor/bin/phpstan analyse
+   ./vendor/bin/sail php artisan test
+   ```
+5. Sube tus cambios (`git push origin feature/nueva-funcionalidad`)
+6. Abre un Pull Request
+
+## Despliegue
+
+Este proyecto está configurado para desplegarse en **Render** con **Supabase** como base de datos. Ver `RENDER_DEPLOY.md` para instrucciones detalladas.
 
 ## Licencia
 
