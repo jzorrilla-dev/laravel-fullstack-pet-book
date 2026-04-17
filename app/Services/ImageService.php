@@ -4,11 +4,24 @@ declare(strict_types=1);
 
 namespace App\Services;
 
-use CloudinaryLabs\CloudinaryLaravel\Facades\Cloudinary;
+use Cloudinary\Api\Upload\UploadApi;
+use Cloudinary\Configuration\Configuration;
 use Illuminate\Http\UploadedFile;
 
 final class ImageService
 {
+    private function getCloudinaryConfig(): Configuration
+    {
+        return Configuration::instance([
+            'cloud' => [
+                'cloud_name' => config('cloudinary.cloud_name'),
+                'api_key' => config('cloudinary.api_key'),
+                'api_secret' => config('cloudinary.api_secret'),
+            ],
+            'secure' => true,
+        ]);
+    }
+
     public function upload(UploadedFile $file, string $folder, ?string $publicId = null): string
     {
         $options = [
@@ -19,7 +32,8 @@ final class ImageService
             $options['public_id'] = $publicId;
         }
 
-        $result = Cloudinary::uploadApi()->upload($file->getRealPath(), $options);
+        $uploader = new UploadApi($this->getCloudinaryConfig());
+        $result = $uploader->upload($file->getRealPath(), $options);
 
         return $result['secure_url'];
     }
@@ -36,7 +50,8 @@ final class ImageService
 
         try {
             $publicId = $this->extractPublicId($url);
-            Cloudinary::uploadApi()->destroy($publicId);
+            $uploader = new UploadApi($this->getCloudinaryConfig());
+            $uploader->destroy($publicId);
         } catch (\Exception $e) {
             logger()->warning('No se pudo eliminar la imagen: '.$e->getMessage());
         }
