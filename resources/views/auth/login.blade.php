@@ -26,7 +26,7 @@
             </button>
             <!-- Enlace para restablecer la contraseña -->
             <div class="mt-4 text-center">
-                <a href="{{ route('password.request') }}" class="text-blue-500 hover:text-blue-700 transition duration-300">
+                <a href="{{ route('password.email') }}" class="text-blue-500 hover:text-blue-700 transition duration-300">
                     ¿Olvidaste tu contraseña?
                 </a>
             </div>
