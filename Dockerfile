@@ -55,7 +55,8 @@ RUN chown -R www-data:www-data /var/www/public/build
 
 COPY nginx.conf /etc/nginx/sites-available/default
 
-RUN ln -sf /etc/nginx/sites-available/default /etc/nginx/sites-enabled/ \
+RUN mkdir -p /etc/nginx/sites-enabled \
+    && ln -sf /etc/nginx/sites-available/default /etc/nginx/sites-enabled/default \
     && mkdir -p /etc/supervisor/conf.d/
 
 COPY supervisord.conf /etc/supervisor/conf.d/supervisord.conf
