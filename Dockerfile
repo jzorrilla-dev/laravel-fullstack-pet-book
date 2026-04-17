@@ -1,83 +1,66 @@
+# ============================================
+# Stage 1: Frontend Builder (Node.js)
+# ============================================
+FROM node:22-alpine AS frontend-builder
+
+WORKDIR /app
+
+COPY package.json pnpm-lock.yaml* ./
+
+RUN corepack enable && pnpm install --frozen-lockfile
+
+COPY . .
+
+RUN pnpm build
+
+# ============================================
+# Stage 2: Production (PHP + Nginx)
+# ============================================
 FROM php:8.4-fpm
 
-# Argumentos para configuración
-ARG user=laravel
 ARG uid=1000
+ARG user=laravel
 
-# Instalar dependencias del sistema
 RUN apt-get update && apt-get install -y \
-    git \
-    curl \
-    libpng-dev \
-    libonig-dev \
-    libxml2-dev \
-    libpq-dev \
-    zip \
-    unzip \
-    nodejs \
-    npm \
-    nginx \
-    supervisor
+        libpng-dev \
+        libonig-dev \
+        libxml2-dev \
+        libpq-dev \
+    && docker-php-ext-install pdo pdo_pgsql pgsql mbstring exif pcntl bcmath gd \
+    && apt-get clean && rm -rf /var/lib/apt/lists/*
 
-# Limpiar cache
-RUN apt-get clean && rm -rf /var/lib/apt/lists/*
-
-# Instalar extensiones PHP
-RUN docker-php-ext-install pdo pdo_pgsql pgsql mbstring exif pcntl bcmath gd
-
-
-# --- FIX 413: Copiar la configuración de límites de PHP ---
 COPY uploads.ini /usr/local/etc/php/conf.d/uploads.ini
-# ---------------------------------------------------------
 
-
-
-# Obtener Composer
 COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
 
-# Crear usuario del sistema
-RUN useradd -G www-data,root -u $uid -d /home/$user $user
-RUN mkdir -p /home/$user/.composer && \
-    chown -R $user:$user /home/$user
+RUN useradd -G www-data,root -u $uid -d /home/$user $user \
+    && mkdir -p /home/$user/.composer \
+    && chown -R $user:$user /home/$user
 
-# Establecer directorio de trabajo
 WORKDIR /var/www
 
-# Copiar código de la aplicación
 COPY . /var/www
 
-# Establecer permisos correctos para Laravel
-RUN chown -R www-data:www-data /var/www/storage /var/www/bootstrap/cache
-RUN chmod -R 775 /var/www/storage /var/www/bootstrap/cache
+RUN chown -R www-data:www-data /var/www/storage /var/www/bootstrap/cache \
+    && chmod -R 775 /var/www/storage /var/www/bootstrap/cache
 
+RUN composer install --optimize-autoloader --no-dev --no-interaction --no-scripts
 
-# Instalar dependencias de Composer
-RUN composer install --optimize-autoloader --no-dev
+COPY --from=frontend-builder /app/public/build /var/www/public/build
 
-# Instalar dependencias de NPM y compilar assets
-RUN npm install && npm run build
-# ... después de RUN npm run build
 RUN chown -R www-data:www-data /var/www/public/build
-# ...
 
-# Configurar Nginx
 COPY nginx.conf /etc/nginx/sites-available/default
-RUN ln -sf /etc/nginx/sites-available/default /etc/nginx/sites-enabled/
 
-# Configurar Supervisor para ejecutar PHP-FPM y Nginx
-RUN mkdir -p /etc/supervisor/conf.d/
+RUN ln -sf /etc/nginx/sites-available/default /etc/nginx/sites-enabled/ \
+    && mkdir -p /etc/supervisor/conf.d/
+
 COPY supervisord.conf /etc/supervisor/conf.d/supervisord.conf
 
-# === PASOS NUEVOS PARA EJECUTAR MIGRACIONES AL INICIO ===
-# Copiar script de entrada y darle permisos de ejecución
 COPY entrypoint.sh /usr/local/bin/entrypoint.sh
+
 RUN chmod +x /usr/local/bin/entrypoint.sh
 
-# Exponer puertos
-EXPOSE 80
-EXPOSE 9000
+EXPOSE 80 9000
 
-# Definir el punto de entrada: ESTO se ejecuta primero al arrancar el contenedor.
 ENTRYPOINT ["/usr/local/bin/entrypoint.sh"]
-# El CMD es ahora ignorado.
-# CMD ["/usr/bin/supervisord", "-c", "/etc/supervisor/conf.d/supervisord.conf"]
