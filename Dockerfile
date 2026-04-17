@@ -30,6 +30,7 @@ RUN apt-get update && apt-get install -y \
         libxml2-dev \
         libpq-dev \
         supervisor \
+        nginx \
     && docker-php-ext-install zip pdo pdo_pgsql pgsql mbstring exif pcntl bcmath gd \
     && apt-get clean && rm -rf /var/lib/apt/lists/*
 
