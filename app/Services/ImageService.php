@@ -19,9 +19,9 @@ final class ImageService
             $options['public_id'] = $publicId;
         }
 
-        $result = /** @scrutinizer ignore-call */ Cloudinary::upload($file->getRealPath(), $options);
+        $result = Cloudinary::uploadApi()->upload($file->getRealPath(), $options);
 
-        return $result->getSecurePath();
+        return $result['secure_url'];
     }
 
     public function delete(?string $url): void
@@ -36,8 +36,7 @@ final class ImageService
 
         try {
             $publicId = $this->extractPublicId($url);
-            /** @scrutinizer ignore-call */
-            Cloudinary::destroy($publicId);
+            Cloudinary::uploadApi()->destroy($publicId);
         } catch (\Exception $e) {
             logger()->warning('No se pudo eliminar la imagen: '.$e->getMessage());
         }
