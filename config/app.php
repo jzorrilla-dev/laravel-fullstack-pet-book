@@ -1,7 +1,13 @@
 <?php
 
+use App\Providers\AppServiceProvider;
+use App\Providers\AuthServiceProvider;
+use App\Providers\EventServiceProvider;
+use App\Providers\RouteServiceProvider;
+use Illuminate\Auth\Passwords\PasswordResetServiceProvider;
 use Illuminate\Support\Facades\Facade;
 use Illuminate\Support\ServiceProvider;
+use Laravel\Sanctum\SanctumServiceProvider;
 
 return [
 
@@ -170,16 +176,16 @@ return [
          * Package Service Providers...
          */
 
-        Laravel\Sanctum\SanctumServiceProvider::class,
+        SanctumServiceProvider::class,
         /*
          * Application Service Providers...
          */
-        App\Providers\AppServiceProvider::class,
-        App\Providers\AuthServiceProvider::class,
+        AppServiceProvider::class,
+        AuthServiceProvider::class,
         // App\Providers\BroadcastServiceProvider::class,
-        App\Providers\EventServiceProvider::class,
-        App\Providers\RouteServiceProvider::class,
-        Illuminate\Auth\Passwords\PasswordResetServiceProvider::class,
+        EventServiceProvider::class,
+        RouteServiceProvider::class,
+        PasswordResetServiceProvider::class,
     ])->toArray(),
 
     /*

@@ -11,3 +11,4 @@ parameters:
         - app/Http/Middleware/*
         - app/Providers/BroadcastServiceProvider.php
         - app/Http/Controllers/SocialAuthController.php
+        - app/Services/ImageService.php

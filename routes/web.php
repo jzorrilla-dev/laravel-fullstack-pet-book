@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\CommentController;
+use App\Http\Controllers\DonationController;
 use App\Http\Controllers\LostPetController;
 use App\Http\Controllers\PetController;
 use App\Http\Controllers\PostController;
@@ -24,11 +25,11 @@ Route::view('/about', 'about')->name('about');
 Route::view('/contactos', 'contactos')->name('contactos');
 
 // Rutas de donaciones
-Route::get('/donations', [App\Http\Controllers\DonationController::class, 'index'])->name('donations.index');
-Route::get('/donations/create', [App\Http\Controllers\DonationController::class, 'create'])->name('donations.create');
-Route::post('/donations/checkout', [App\Http\Controllers\DonationController::class, 'checkout'])->name('donations.checkout');
-Route::get('/donations/success', [App\Http\Controllers\DonationController::class, 'success'])->name('donations.success');
-Route::get('/donations/cancel', [App\Http\Controllers\DonationController::class, 'cancel'])->name('donations.cancel');
+Route::get('/donations', [DonationController::class, 'index'])->name('donations.index');
+Route::get('/donations/create', [DonationController::class, 'create'])->name('donations.create');
+Route::post('/donations/checkout', [DonationController::class, 'checkout'])->name('donations.checkout');
+Route::get('/donations/success', [DonationController::class, 'success'])->name('donations.success');
+Route::get('/donations/cancel', [DonationController::class, 'cancel'])->name('donations.cancel');
 
 // Rutas de Blogs (CORREGIDAS)
 Route::middleware('auth')->group(function () {
