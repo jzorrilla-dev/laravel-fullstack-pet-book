@@ -22,11 +22,14 @@ ARG uid=1000
 ARG user=laravel
 
 RUN apt-get update && apt-get install -y \
+        git \
+        unzip \
+        libzip-dev \
         libpng-dev \
         libonig-dev \
         libxml2-dev \
         libpq-dev \
-    && docker-php-ext-install pdo pdo_pgsql pgsql mbstring exif pcntl bcmath gd \
+    && docker-php-ext-install zip pdo pdo_pgsql pgsql mbstring exif pcntl bcmath gd \
     && apt-get clean && rm -rf /var/lib/apt/lists/*
 
 COPY uploads.ini /usr/local/etc/php/conf.d/uploads.ini
