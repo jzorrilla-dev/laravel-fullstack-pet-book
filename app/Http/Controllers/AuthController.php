@@ -9,10 +9,12 @@ use App\Http\Requests\UpdateProfileRequest;
 use App\Models\User;
 use App\Services\ProfileService;
 use Illuminate\Auth\Events\PasswordReset;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Password;
+use Illuminate\View\View;
 
 class AuthController extends Controller
 {
@@ -20,12 +22,12 @@ class AuthController extends Controller
         private readonly ProfileService $profileService,
     ) {}
 
-    public function showRegistrationForm()
+    public function showRegistrationForm(): View
     {
         return view('auth.register');
     }
 
-    public function register(RegisterRequest $request)
+    public function register(RegisterRequest $request): RedirectResponse
     {
         $user = User::create([
             'user_name' => $request->user_name,
@@ -40,12 +42,12 @@ class AuthController extends Controller
         return redirect()->route('home')->with('success', '¡Registro exitoso! ¡Bienvenido a Pet Book!');
     }
 
-    public function showLoginForm()
+    public function showLoginForm(): View
     {
         return view('auth.login');
     }
 
-    public function login(LoginRequest $request)
+    public function login(LoginRequest $request): RedirectResponse
     {
         if (Auth::attempt($request->only('email', 'password'))) {
             $request->session()->regenerate();
@@ -58,7 +60,7 @@ class AuthController extends Controller
         ])->onlyInput('email');
     }
 
-    public function logout(Request $request)
+    public function logout(Request $request): RedirectResponse
     {
         Auth::guard('web')->logout();
         $request->session()->invalidate();
@@ -67,12 +69,12 @@ class AuthController extends Controller
         return redirect()->route('home')->with('status', '¡Sesión cerrada!');
     }
 
-    public function showLinkRequestForm()
+    public function showLinkRequestForm(): View
     {
         return view('auth.passwords.email');
     }
 
-    public function forgotPassword(Request $request)
+    public function forgotPassword(Request $request): RedirectResponse
     {
         $request->validate(['email' => ['required', 'email']]);
 
@@ -85,14 +87,14 @@ class AuthController extends Controller
         return back()->withErrors(['email' => 'No pudimos encontrar un usuario con esa dirección de correo.']);
     }
 
-    public function showResetForm(Request $request)
+    public function showResetForm(Request $request): View
     {
         return view('auth.passwords.reset')->with(
             ['token' => $request->token, 'email' => $request->email]
         );
     }
 
-    public function resetPassword(Request $request)
+    public function resetPassword(Request $request): RedirectResponse
     {
         $request->validate([
             'token' => ['required'],
@@ -116,21 +118,21 @@ class AuthController extends Controller
         return back()->withErrors(['email' => trans($response)]);
     }
 
-    public function showProfile()
+    public function showProfile(): View
     {
         $user = Auth::user();
 
         return view('profile.show', compact('user'));
     }
 
-    public function editProfile()
+    public function editProfile(): View
     {
         $user = Auth::user();
 
         return view('profile.edit', compact('user'));
     }
 
-    public function updateProfile(UpdateProfileRequest $request)
+    public function updateProfile(UpdateProfileRequest $request): RedirectResponse
     {
         $user = Auth::user();
 
@@ -143,7 +145,7 @@ class AuthController extends Controller
         return redirect()->route('profile')->with('success', 'Perfil actualizado correctamente.');
     }
 
-    public function destroyAccount(DestroyAccountRequest $request)
+    public function destroyAccount(DestroyAccountRequest $request): RedirectResponse
     {
         $user = Auth::user();
 

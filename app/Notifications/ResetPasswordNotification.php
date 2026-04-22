@@ -3,28 +3,32 @@
 namespace App\Notifications;
 
 use Illuminate\Bus\Queueable;
+use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Notifications\Messages\MailMessage;
 use Illuminate\Notifications\Notification;
 
-class ResetPasswordNotification extends Notification
+class ResetPasswordNotification extends Notification implements ShouldQueue
 {
     use Queueable;
 
-    public $token;
+    public string $token;
 
-    public static $toMailCallback;
+    public static ?\Closure $toMailCallback = null;
 
-    public function __construct($token)
+    public function __construct(string $token)
     {
         $this->token = $token;
     }
 
-    public function via($notifiable)
+    /**
+     * @return array<string>
+     */
+    public function via(object $notifiable): array
     {
         return ['mail'];
     }
 
-    public function toMail($notifiable)
+    public function toMail(object $notifiable): MailMessage
     {
         if (static::$toMailCallback) {
             return call_user_func(static::$toMailCallback, $notifiable, $this->token);
@@ -44,7 +48,7 @@ class ResetPasswordNotification extends Notification
             ->line('Si no solicitaste un restablecimiento de contraseña, no se requiere ninguna acción adicional.');
     }
 
-    public static function toMailUsing($callback)
+    public static function toMailUsing(\Closure $callback): void
     {
         static::$toMailCallback = $callback;
     }

@@ -5,10 +5,15 @@ parameters:
     paths:
         - app/
 
-    level: 3
+    level: 6
 
     excludePaths:
         - app/Http/Middleware/*
         - app/Providers/BroadcastServiceProvider.php
         - app/Http/Controllers/SocialAuthController.php
         - app/Services/ImageService.php
+
+    ignoreErrors:
+        - '#uses generic trait Illuminate\\Database\\Eloquent\\Factories\\HasFactory#'
+        - '#Method .*::rules\(\) return type has no value type specified#'
+        - '#Method .*::messages\(\) return type has no value type specified#'

@@ -22,11 +22,17 @@ class Pet extends Model
         'user_id',
     ];
 
+    /**
+     * @return BelongsTo<User, $this>
+     */
     public function user(): BelongsTo
     {
         return $this->belongsTo(User::class, 'user_id');
     }
 
+    /**
+     * @return HasOne<Adoption, $this>
+     */
     public function adoption(): HasOne
     {
         return $this->hasOne(Adoption::class, 'pet_id');

@@ -6,6 +6,7 @@ namespace App\Models;
 use App\Notifications\ResetPasswordNotification;
 use Illuminate\Auth\Passwords\CanResetPassword;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Laravel\Sanctum\HasApiTokens; // Importa tu notificador
@@ -34,34 +35,50 @@ class User extends Authenticatable
     ];
 
     // Relaciones
-    public function pets()
+    /**
+     * @return HasMany<Pet, $this>
+     */
+    public function pets(): HasMany
     {
         return $this->hasMany(Pet::class, 'user_id');
     }
 
-    public function lostPets()
+    /**
+     * @return HasMany<LostPet, $this>
+     */
+    public function lostPets(): HasMany
     {
         return $this->hasMany(LostPet::class, 'user_id');
     }
 
-    public function adoptionsAsCreator()
+    /**
+     * @return HasMany<Adoption, $this>
+     */
+    public function adoptionsAsCreator(): HasMany
     {
         return $this->hasMany(Adoption::class, 'creator_user_id');
     }
 
-    public function adoptionsAsAdopter()
+    /**
+     * @return HasMany<Adoption, $this>
+     */
+    public function adoptionsAsAdopter(): HasMany
     {
         return $this->hasMany(Adoption::class, 'adopter_user_id');
     }
 
-    // Relación con los posts creados por el usuario
-    public function posts()
+    /**
+     * @return HasMany<Post, $this>
+     */
+    public function posts(): HasMany
     {
         return $this->hasMany(Post::class, 'user_id', 'user_id');
     }
 
-    // Relación con los comentarios creados por el usuario
-    public function comments()
+    /**
+     * @return HasMany<Comment, $this>
+     */
+    public function comments(): HasMany
     {
         return $this->hasMany(Comment::class, 'user_id', 'user_id');
     }

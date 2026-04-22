@@ -6,7 +6,9 @@ use App\Http\Requests\StoreLostPetRequest;
 use App\Http\Requests\UpdateLostPetRequest;
 use App\Models\LostPet;
 use App\Services\LostPetService;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\View\View;
 
 class LostPetController extends Controller
 {
@@ -14,26 +16,26 @@ class LostPetController extends Controller
         private readonly LostPetService $lostPetService,
     ) {}
 
-    public function index()
+    public function index(): View
     {
         $lostPets = LostPet::with('user')->latest()->paginate(9);
 
         return view('lostpets.index', compact('lostPets'));
     }
 
-    public function show(int $id)
+    public function show(int $id): View
     {
         $lostPet = LostPet::with('user')->findOrFail($id);
 
         return view('lostpets.show', compact('lostPet'));
     }
 
-    public function create()
+    public function create(): View
     {
         return view('lostpets.create');
     }
 
-    public function store(StoreLostPetRequest $request)
+    public function store(StoreLostPetRequest $request): RedirectResponse
     {
         try {
             $lostPet = $this->lostPetService->create(
@@ -51,7 +53,7 @@ class LostPetController extends Controller
         }
     }
 
-    public function edit(int $id)
+    public function edit(int $id): View
     {
         $lostPet = LostPet::findOrFail($id);
 
@@ -62,7 +64,7 @@ class LostPetController extends Controller
         return view('lostpets.edit', compact('lostPet'));
     }
 
-    public function update(UpdateLostPetRequest $request, int $id)
+    public function update(UpdateLostPetRequest $request, int $id): RedirectResponse
     {
         $lostPet = LostPet::findOrFail($id);
 
@@ -82,7 +84,7 @@ class LostPetController extends Controller
         }
     }
 
-    public function destroy(int $id)
+    public function destroy(int $id): RedirectResponse
     {
         $lostPet = LostPet::findOrFail($id);
 

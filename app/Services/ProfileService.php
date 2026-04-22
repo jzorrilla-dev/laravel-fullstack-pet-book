@@ -14,6 +14,9 @@ final class ProfileService
         private readonly ImageService $imageService,
     ) {}
 
+    /**
+     * @param  array<string, mixed>  $data
+     */
     public function update(User $user, array $data, ?UploadedFile $photo = null): User
     {
         $user->user_name = $data['user_name'];

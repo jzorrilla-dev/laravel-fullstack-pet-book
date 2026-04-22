@@ -3,25 +3,27 @@
 namespace App\Http\Controllers;
 
 use App\Models\Donation;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\View\View;
 use Stripe\Checkout\Session;
 use Stripe\Exception\ApiErrorException;
 use Stripe\Stripe;
 
 class DonationController extends Controller
 {
-    public function index()
+    public function index(): View
     {
         return view('donations.index');
     }
 
-    public function create()
+    public function create(): View
     {
         return view('donations.create');
     }
 
-    public function checkout(Request $request)
+    public function checkout(Request $request): RedirectResponse
     {
         $request->validate([
             'amount' => 'required|numeric|min:1',
@@ -76,7 +78,7 @@ class DonationController extends Controller
         }
     }
 
-    public function success(Request $request)
+    public function success(Request $request): View
     {
         if ($request->session_id) {
             $donation = Donation::where('payment_id', $request->session_id)->first();
@@ -89,7 +91,7 @@ class DonationController extends Controller
         return view('donations.success');
     }
 
-    public function cancel()
+    public function cancel(): View
     {
         return view('donations.cancel');
     }

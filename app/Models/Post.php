@@ -7,6 +7,9 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
+/**
+ * @method static PostFactory factory($count = null)
+ */
 class Post extends Model
 {
     use HasFactory;
@@ -18,11 +21,17 @@ class Post extends Model
         'category',
     ];
 
+    /**
+     * @return BelongsTo<User, $this>
+     */
     public function user(): BelongsTo
     {
         return $this->belongsTo(User::class, 'user_id', 'user_id');
     }
 
+    /**
+     * @return HasMany<Comment, $this>
+     */
     public function comments(): HasMany
     {
         return $this->hasMany(Comment::class);

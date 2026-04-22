@@ -13,6 +13,9 @@ final class PetService
         private readonly ImageService $imageService,
     ) {}
 
+    /**
+     * @param  array<string, mixed>  $data
+     */
     public function create(array $data, int $userId, ?UploadedFile $photo = null): Pet
     {
         $pet = new Pet;
@@ -34,6 +37,9 @@ final class PetService
         return $pet;
     }
 
+    /**
+     * @param  array<string, mixed>  $data
+     */
     public function update(Pet $pet, array $data, ?UploadedFile $photo = null): Pet
     {
         $pet->pet_name = $data['pet_name'];

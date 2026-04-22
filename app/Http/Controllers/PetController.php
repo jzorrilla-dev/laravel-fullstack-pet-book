@@ -7,7 +7,9 @@ use App\Http\Requests\UpdatePetRequest;
 use App\Models\LostPet;
 use App\Models\Pet;
 use App\Services\PetService;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\View\View;
 
 class PetController extends Controller
 {
@@ -15,7 +17,7 @@ class PetController extends Controller
         private readonly PetService $petService,
     ) {}
 
-    public function home()
+    public function home(): View
     {
         $pets = Pet::latest()->take(9)->get();
         $lostPets = LostPet::latest()->take(9)->get();
@@ -23,26 +25,26 @@ class PetController extends Controller
         return view('home', compact('pets', 'lostPets'));
     }
 
-    public function index()
+    public function index(): View
     {
         $pets = Pet::latest()->paginate(9);
 
         return view('pets.index', compact('pets'));
     }
 
-    public function show(int $pet_id)
+    public function show(int $pet_id): View
     {
         $pet = Pet::with('user')->findOrFail($pet_id);
 
         return view('pets.show', compact('pet'));
     }
 
-    public function create()
+    public function create(): View
     {
         return view('pets.create');
     }
 
-    public function store(StorePetRequest $request)
+    public function store(StorePetRequest $request): RedirectResponse
     {
         try {
             $pet = $this->petService->create(
@@ -60,7 +62,7 @@ class PetController extends Controller
         }
     }
 
-    public function edit(int $pet_id)
+    public function edit(int $pet_id): View
     {
         $pet = Pet::findOrFail($pet_id);
 
@@ -71,7 +73,7 @@ class PetController extends Controller
         return view('pets.edit', compact('pet'));
     }
 
-    public function update(UpdatePetRequest $request, int $pet_id)
+    public function update(UpdatePetRequest $request, int $pet_id): RedirectResponse
     {
         $pet = Pet::findOrFail($pet_id);
 
@@ -91,7 +93,7 @@ class PetController extends Controller
         }
     }
 
-    public function destroy(int $pet_id)
+    public function destroy(int $pet_id): RedirectResponse
     {
         $pet = Pet::findOrFail($pet_id);
 

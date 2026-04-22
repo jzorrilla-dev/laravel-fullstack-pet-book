@@ -13,6 +13,9 @@ final class LostPetService
         private readonly ImageService $imageService,
     ) {}
 
+    /**
+     * @param  array<string, mixed>  $data
+     */
     public function create(array $data, int $userId, ?UploadedFile $photo = null): LostPet
     {
         $lostPet = new LostPet;
@@ -32,6 +35,9 @@ final class LostPetService
         return $lostPet;
     }
 
+    /**
+     * @param  array<string, mixed>  $data
+     */
     public function update(LostPet $lostPet, array $data, ?UploadedFile $photo = null): LostPet
     {
         $lostPet->pet_name = $data['pet_name'] ?? null;

@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class Adoption extends Model
 {
@@ -15,17 +16,26 @@ class Adoption extends Model
         'adoption_date',
     ];
 
-    public function creator()
+    /**
+     * @return BelongsTo<User, $this>
+     */
+    public function creator(): BelongsTo
     {
         return $this->belongsTo(User::class, 'creator_user_id');
     }
 
-    public function adopter()
+    /**
+     * @return BelongsTo<User, $this>
+     */
+    public function adopter(): BelongsTo
     {
         return $this->belongsTo(User::class, 'adopter_user_id');
     }
 
-    public function pet()
+    /**
+     * @return BelongsTo<Pet, $this>
+     */
+    public function pet(): BelongsTo
     {
         return $this->belongsTo(Pet::class, 'pet_id');
     }
