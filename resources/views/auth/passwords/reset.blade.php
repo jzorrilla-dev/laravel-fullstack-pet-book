@@ -24,7 +24,7 @@
                 <label for="email" class="block text-gray-700 text-sm font-semibold mb-2">
                     Correo Electrónico
                 </label>
-                <input id="email" type="email" class="w-full px-4 py-2 border border-black-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 @error('email') border-red-500 @enderror" name="email" value="{{ $email ?? old('email') }}" required autocomplete="email" autofocus>
+                <input id="email" type="email" class="w-full px-4 py-2 border border-black-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 bg-gray-100" name="email" value="{{ $email }}" required autocomplete="email" readonly>
 
                 @error('email')
                 <p class="text-red-500 text-xs mt-2">{{ $message }}</p>
