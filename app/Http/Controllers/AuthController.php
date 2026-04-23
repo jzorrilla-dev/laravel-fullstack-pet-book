@@ -9,11 +9,14 @@ use App\Http\Requests\UpdateProfileRequest;
 use App\Models\User;
 use App\Services\ProfileService;
 use Illuminate\Auth\Events\PasswordReset;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Password;
+use Illuminate\Support\Str;
 use Illuminate\View\View;
 
 class AuthController extends Controller
@@ -49,14 +52,18 @@ class AuthController extends Controller
 
     public function login(LoginRequest $request): RedirectResponse
     {
-        if (Auth::attempt($request->only('email', 'password'))) {
+        $credentials = $request->only('email', 'password');
+
+        // Intentar autenticación
+        if (Auth::attempt($credentials)) {
             $request->session()->regenerate();
 
             return redirect()->intended(route('home'))->with('success', '¡Has iniciado sesión con éxito!');
         }
 
+        // Mensaje genérico por seguridad
         return back()->withErrors([
-            'email' => 'Las credenciales proporcionadas no coinciden con nuestros registros.',
+            'email' => 'Las credenciales proporcionadas no son correctas. Por favor, verifica tu correo y contraseña.',
         ])->onlyInput('email');
     }
 
@@ -78,44 +85,99 @@ class AuthController extends Controller
     {
         $request->validate(['email' => ['required', 'email']]);
 
-        $response = Password::broker()->sendResetLink($request->only('email'));
+        // Buscar usuario primero
+        $user = User::where('email', $request->email)->first();
 
-        if ($response == Password::RESET_LINK_SENT) {
-            return back()->with('status', 'Te hemos enviado el enlace de restablecimiento de contraseña.');
+        // Generar token manualmente para tener control sobre user_id
+        if ($user) {
+            $token = Str::random(64);
+            DB::table('password_reset_tokens')->insert([
+                'email' => $user->email,
+                'user_id' => $user->user_id,
+                'token' => $token,
+                'created_at' => now(),
+            ]);
+
+            // Enviar correo manualmente
+            $user->sendPasswordResetNotification($token);
         }
 
-        return back()->withErrors(['email' => 'No pudimos encontrar un usuario con esa dirección de correo.']);
+        // Mensaje genérico por seguridad (no revela si el email existe)
+        return back()->with('status', 'Si el correo electrónico existe en nuestro sistema, recibirás un enlace de restablecimiento en tu correo.');
     }
 
     public function showResetForm(Request $request): View
     {
+        // Solo pasar el token, no el email
         return view('auth.passwords.reset')->with(
-            ['token' => $request->token, 'email' => $request->email]
+            ['token' => $request->token]
         );
+    }
+
+    public function validateResetToken(Request $request): JsonResponse
+    {
+        $token = $request->validate(['token' => 'required|string']);
+
+        // Buscar token en la base de datos
+        $tokenRecord = DB::table('password_reset_tokens')
+            ->where('token', $token)
+            ->where('created_at', '>', now()->subMinutes(60))
+            ->first();
+
+        if (!$tokenRecord) {
+            return response()->json(['error' => 'Token inválido o expirado'], 422);
+        }
+
+        // Obtener usuario asociado al token
+        $user = User::find($tokenRecord->user_id);
+
+        if (!$user) {
+            return response()->json(['error' => 'Usuario no encontrado'], 422);
+        }
+
+        return response()->json([
+            'email' => $user->email,
+            'user_name' => $user->user_name,
+        ]);
     }
 
     public function resetPassword(Request $request): RedirectResponse
     {
         $request->validate([
-            'token' => ['required'],
-            'email' => ['required', 'email'],
-            'password' => ['required', 'string', 'min:8', 'confirmed'],
+            'token' => 'required',
+            'password' => 'required|string|min:8|confirmed',
         ]);
 
-        $response = Password::broker()->reset(
-            $request->only('email', 'password', 'password_confirmation', 'token'),
-            function ($user, $password) {
-                $user->password = Hash::make($password);
-                $user->save();
-                event(new PasswordReset($user));
-            }
-        );
+        // Buscar token en la base de datos
+        $tokenRecord = DB::table('password_reset_tokens')
+            ->where('token', $request->token)
+            ->first();
 
-        if ($response == Password::PASSWORD_RESET) {
-            return redirect()->route('login')->with('status', '¡Tu contraseña ha sido restablecida!');
+        if (!$tokenRecord) {
+            return back()->withErrors(['token' => 'Token inválido o expirado']);
         }
 
-        return back()->withErrors(['email' => trans($response)]);
+        // Obtener usuario usando user_id del token (ignorar email del request por seguridad)
+        $user = User::find($tokenRecord->user_id);
+
+        if (!$user) {
+            return back()->withErrors(['token' => 'Usuario no encontrado']);
+        }
+
+        // Actualizar contraseña
+        $user->password = Hash::make($request->password);
+        $user->save();
+
+        // IMPORTANTE: Eliminar token inmediatamente
+        DB::table('password_reset_tokens')->where('token', $request->token)->delete();
+
+        // Invalidar todas las sesiones activas (seguridad)
+        $user->tokens()->delete();
+
+        // Evento de password reset
+        event(new PasswordReset($user));
+
+        return redirect()->route('login')->with('status', '¡Contraseña restablecida correctamente!');
     }
 
     public function showProfile(): View

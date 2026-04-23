@@ -34,10 +34,9 @@ class ResetPasswordNotification extends Notification implements ShouldQueue
             return call_user_func(static::$toMailCallback, $notifiable, $this->token);
         }
 
-        // 1. Corregimos la construcción de la URL: usamos route() en lugar de config('app.frontend_url')
+        // URL segura: solo el token, sin email en la URL
         $url = route('password.reset', [
             'token' => $this->token,
-            'email' => $notifiable->getEmailForPasswordReset(),
         ]);
 
         return (new MailMessage)
