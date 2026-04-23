@@ -60,8 +60,10 @@ class DonationController extends Controller
             ]);
 
             // Guardar la donación en la base de datos con estado pendiente
+            /** @var int|string|null $userId */
+            $userId = Auth::id();
             Donation::create([
-                'user_id' => Auth::id(),
+                'user_id' => $userId,
                 'amount' => $request->amount,
                 'currency' => 'USD',
                 'payment_id' => $session->id,
@@ -72,7 +74,7 @@ class DonationController extends Controller
                 'message' => $request->message,
             ]);
 
-            return redirect($session->url);
+            return redirect()->to($session->url);
         } catch (ApiErrorException $e) {
             return back()->withErrors(['error' => $e->getMessage()]);
         }

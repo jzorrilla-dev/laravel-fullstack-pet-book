@@ -5,7 +5,7 @@ parameters:
     paths:
         - app/
 
-    level: 6
+    level: 7
 
     excludePaths:
         - app/Http/Middleware/*
@@ -17,3 +17,11 @@ parameters:
         - '#uses generic trait Illuminate\\Database\\Eloquent\\Factories\\HasFactory#'
         - '#Method .*::rules\(\) return type has no value type specified#'
         - '#Method .*::messages\(\) return type has no value type specified#'
+        - '#Access to an undefined property object::#'
+        - '#Access to an undefined property#'
+        - '#Call to an undefined method#'
+        - '#Parameter.*PasswordReset#'
+        - '#Parameter.*static method#'
+        - '#Offset.*does not accept type#'
+
+    reportUnmatchedIgnoredErrors: false

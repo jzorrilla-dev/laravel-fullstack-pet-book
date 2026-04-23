@@ -15,11 +15,12 @@ final class LostPetService
 
     /**
      * @param  array<string, mixed>  $data
+     * @param  int|string|null  $userId
      */
-    public function create(array $data, int $userId, ?UploadedFile $photo = null): LostPet
+    public function create(array $data, int|string|null $userId, ?UploadedFile $photo = null): LostPet
     {
         $lostPet = new LostPet;
-        $lostPet->user_id = $userId;
+        $lostPet->user_id = $userId !== null ? (int) $userId : null;
         $lostPet->pet_name = $data['pet_name'] ?? null;
         $lostPet->last_seen = $data['last_seen'] ?? null;
         $lostPet->lost_date = $data['lost_date'] ?? null;
@@ -62,7 +63,7 @@ final class LostPetService
         $lostPet->delete();
     }
 
-    public function isOwner(LostPet $lostPet, int $userId): bool
+    public function isOwner(LostPet $lostPet, int|string|null $userId): bool
     {
         return (int) $lostPet->user_id === (int) $userId;
     }
