@@ -14,4 +14,8 @@ php artisan migrate --force
 echo "Iniciando servicios Nginx y PHP-FPM con Supervisor..."
 # El comando 'exec' reemplaza el proceso actual del script con el supervisor, 
 # asegurando que las señales de apagado de Docker funcionen correctamente.
+echo "PHP runtime:"
+php -v
+
 exec /usr/bin/supervisord -c /etc/supervisor/conf.d/supervisord.conf
+
